@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pose Counter</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    header {
+      margin: 20px 0 10px;
+      text-align: center;
+    }
+
+    .mode-switch {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .mode-btn {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .mode-btn.active {
+      background: #00ffaa;
+      color: #05140f;
+      font-weight: 700;
+    }
+
+    .status {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .status div {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 12px 18px;
+      border-radius: 12px;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    #output {
+      width: min(90vw, 720px);
+      max-width: 100%;
+      border-radius: 16px;
+      background: #000;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    @media (max-width: 600px) {
+      .status {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pose Counter</h1>
+    <p>Choose a mode and perform the exercise to count reps.</p>
+  </header>
+
+  <div class="mode-switch">
+    <button id="modeCurls" class="mode-btn active" type="button">Arm Curls</button>
+    <button id="modeSquats" class="mode-btn" type="button">Squats</button>
+    <button id="modeLunges" class="mode-btn" type="button">Forward Lunges</button>
+    <button id="modeRaises" class="mode-btn" type="button">Lateral Raises</button>
+    <button id="modeSideRaises" class="mode-btn" type="button">Side Lateral Raises</button>
+  </div>
+
+  <div class="status" id="curlStats">
+    <div>
+      <strong>Left Reps</strong>
+      <div id="leftReps">0</div>
+    </div>
+    <div>
+      <strong>Right Reps</strong>
+      <div id="rightReps">0</div>
+    </div>
+    <div>
+      <strong>Total Reps</strong>
+      <div id="totalReps">0</div>
+    </div>
+    <div>
+      <strong>Left Stage</strong>
+      <div id="leftStage">None</div>
+    </div>
+    <div>
+      <strong>Right Stage</strong>
+      <div id="rightStage">None</div>
+    </div>
+  </div>
+
+  <div class="status" id="squatStats" style="display: none;">
+    <div>
+      <strong>Reps</strong>
+      <div id="squatReps">0</div>
+    </div>
+    <div>
+      <strong>Stage</strong>
+      <div id="squatStage">None</div>
+    </div>
+    <div>
+      <strong>Angle</strong>
+      <div id="squatAngle">0°</div>
+    </div>
+  </div>
+
+  <div class="status" id="lungeStats" style="display: none;">
+    <div>
+      <strong>Reps</strong>
+      <div id="lungeReps">0</div>
+    </div>
+    <div>
+      <strong>Stage</strong>
+      <div id="lungeStage">None</div>
+    </div>
+    <div>
+      <strong>Side</strong>
+      <div id="lungeSide">-</div>
+    </div>
+  </div>
+
+  <div class="status" id="raiseStats" style="display: none;">
+    <div>
+      <strong>Reps</strong>
+      <div id="raiseReps">0</div>
+    </div>
+    <div>
+      <strong>Stage</strong>
+      <div id="raiseStage">None</div>
+    </div>
+    <div>
+      <strong>Angle</strong>
+      <div id="raiseAngle">0°</div>
+    </div>
+  </div>
+
+  <div class="status" id="sideRaiseStats" style="display: none;">
+    <div>
+      <strong>Reps</strong>
+      <div id="sideRaiseReps">0</div>
+    </div>
+    <div>
+      <strong>Stage</strong>
+      <div id="sideRaiseStage">None</div>
+    </div>
+    <div>
+      <strong>Angle</strong>
+      <div id="sideRaiseAngle">0°</div>
+    </div>
+  </div>
+
+  <canvas id="output" width="640" height="480"></canvas>
+  <video id="video" style="display:none"></video>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <script>
+    const videoElement = document.getElementById('video');
+    const canvasElement = document.getElementById('output');
+    const canvasCtx = canvasElement.getContext('2d');
+    const curlStats = document.getElementById('curlStats');
+    const squatStats = document.getElementById('squatStats');
+    const lungeStats = document.getElementById('lungeStats');
+    const leftRepsElement = document.getElementById('leftReps');
+    const rightRepsElement = document.getElementById('rightReps');
+    const totalRepsElement = document.getElementById('totalReps');
+    const leftStageElement = document.getElementById('leftStage');
+    const rightStageElement = document.getElementById('rightStage');
+    const squatRepsElement = document.getElementById('squatReps');
+    const squatStageElement = document.getElementById('squatStage');
+    const squatAngleElement = document.getElementById('squatAngle');
+    const lungeRepsElement = document.getElementById('lungeReps');
+    const lungeStageElement = document.getElementById('lungeStage');
+    const lungeSideElement = document.getElementById('lungeSide');
+    const raiseRepsElement = document.getElementById('raiseReps');
+    const raiseStageElement = document.getElementById('raiseStage');
+    const raiseAngleElement = document.getElementById('raiseAngle');
+    const sideRaiseRepsElement = document.getElementById('sideRaiseReps');
+    const sideRaiseStageElement = document.getElementById('sideRaiseStage');
+    const sideRaiseAngleElement = document.getElementById('sideRaiseAngle');
+    const modeCurlsButton = document.getElementById('modeCurls');
+    const modeSquatsButton = document.getElementById('modeSquats');
+    const modeLungesButton = document.getElementById('modeLunges');
+    const modeRaisesButton = document.getElementById('modeRaises');
+    const modeSideRaisesButton = document.getElementById('modeSideRaises');
+
+    let leftCounter = 0;
+    let rightCounter = 0;
+    let leftStage = 'None';
+    let rightStage = 'None';
+    let squatCounter = 0;
+    let squatStage = 'UP';
+    let lungeCounter = 0;
+    let lungeStage = 'None';
+    let lungeSide = '-';
+    let raiseCounter = 0;
+    let raiseStage = 'DOWN';
+    let sideRaiseCounter = 0;
+    let sideRaiseStage = 'DOWN';
+    let currentMode = 'curls';
+
+    function calculateAngle(a, b, c) {
+      const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+      let angle = Math.abs((radians * 180.0) / Math.PI);
+      if (angle > 180) {
+        angle = 360 - angle;
+      }
+      return angle;
+    }
+
+    function updateArm(stageRef, counterRef, angle) {
+      if (angle > 160) {
+        stageRef = 'DOWN';
+      }
+
+      if (angle < 30 && stageRef === 'DOWN') {
+        stageRef = 'UP';
+        counterRef += 1;
+      }
+
+      return { stage: stageRef, counter: counterRef };
+    }
+
+    function updateSquat(angle) {
+      if (angle < 110 && squatStage === 'UP') {
+        squatStage = 'DOWN';
+      }
+
+      if (angle > 140 && squatStage === 'DOWN') {
+        squatStage = 'UP';
+        squatCounter += 1;
+      }
+
+      return { stage: squatStage, counter: squatCounter, angle };
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      const isCurls = mode === 'curls';
+      const isSquats = mode === 'squats';
+      curlStats.style.display = isCurls ? 'flex' : 'none';
+      squatStats.style.display = isSquats ? 'flex' : 'none';
+      lungeStats.style.display = mode === 'lunges' ? 'flex' : 'none';
+      raiseStats.style.display = mode === 'raises' ? 'flex' : 'none';
+      sideRaiseStats.style.display = mode === 'sideRaises' ? 'flex' : 'none';
+      modeCurlsButton.classList.toggle('active', isCurls);
+      modeSquatsButton.classList.toggle('active', isSquats);
+      modeLungesButton.classList.toggle('active', mode === 'lunges');
+      modeRaisesButton.classList.toggle('active', mode === 'raises');
+      modeSideRaisesButton.classList.toggle('active', mode === 'sideRaises');
+    }
+
+    modeCurlsButton.addEventListener('click', () => setMode('curls'));
+    modeSquatsButton.addEventListener('click', () => setMode('squats'));
+    modeLungesButton.addEventListener('click', () => setMode('lunges'));
+    modeRaisesButton.addEventListener('click', () => setMode('raises'));
+    modeSideRaisesButton.addEventListener('click', () => setMode('sideRaises'));
+
+    function onResults(results) {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+      if (results.poseLandmarks) {
+        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
+          color: '#00FFAA',
+          lineWidth: 4,
+        });
+        drawLandmarks(canvasCtx, results.poseLandmarks, {
+          color: '#FF2C7A',
+          lineWidth: 2,
+          radius: 4,
+        });
+
+        if (currentMode === 'curls') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftElbow = results.poseLandmarks[13];
+          const leftWrist = results.poseLandmarks[15];
+
+          if (leftShoulder && leftElbow && leftWrist) {
+            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            const leftUpdate = updateArm(leftStage, leftCounter, leftAngle);
+            leftStage = leftUpdate.stage;
+            leftCounter = leftUpdate.counter;
+            leftStageElement.textContent = leftStage;
+            leftRepsElement.textContent = leftCounter;
+          }
+
+          const rightShoulder = results.poseLandmarks[12];
+          const rightElbow = results.poseLandmarks[14];
+          const rightWrist = results.poseLandmarks[16];
+
+          if (rightShoulder && rightElbow && rightWrist) {
+            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            const rightUpdate = updateArm(rightStage, rightCounter, rightAngle);
+            rightStage = rightUpdate.stage;
+            rightCounter = rightUpdate.counter;
+            rightStageElement.textContent = rightStage;
+            rightRepsElement.textContent = rightCounter;
+          }
+
+          const totalCounter = leftCounter + rightCounter;
+          totalRepsElement.textContent = totalCounter;
+
+          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          canvasCtx.fillRect(0, 0, 320, 100);
+          canvasCtx.fillStyle = '#fff';
+          canvasCtx.font = '18px Arial';
+          canvasCtx.fillText(`LEFT: ${leftCounter}`, 12, 28);
+          canvasCtx.fillText(`RIGHT: ${rightCounter}`, 12, 56);
+          canvasCtx.fillText(`TOTAL: ${totalCounter}`, 12, 84);
+        } else if (currentMode === 'squats') {
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+            const squatUpdate = updateSquat(averageAngle);
+            squatStage = squatUpdate.stage;
+            squatCounter = squatUpdate.counter;
+            squatStageElement.textContent = squatStage;
+            squatRepsElement.textContent = squatCounter;
+            squatAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+
+          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          canvasCtx.fillRect(0, 0, 280, 80);
+          canvasCtx.fillStyle = '#fff';
+          canvasCtx.font = '18px Arial';
+          canvasCtx.fillText(`SQUATS: ${squatCounter}`, 12, 28);
+          canvasCtx.fillText(`STAGE: ${squatStage}`, 12, 56);
+            } else if (currentMode === 'lunges') {
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const leftStride = leftAngle < 120;
+            const rightStride = rightAngle < 120;
+
+            if (leftStride && rightStride) {
+              lungeStage = 'DOWN';
+              lungeSide = 'BOTH';
+            } else if (leftStride) {
+              lungeStage = 'DOWN';
+              lungeSide = 'LEFT';
+            } else if (rightStride) {
+              lungeStage = 'DOWN';
+              lungeSide = 'RIGHT';
+            } else if (lungeStage === 'DOWN') {
+              lungeStage = 'UP';
+              lungeCounter += 1;
+            }
+
+            lungeRepsElement.textContent = lungeCounter;
+            lungeStageElement.textContent = lungeStage;
+            lungeSideElement.textContent = lungeSide;
+          }
+
+          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          canvasCtx.fillRect(0, 0, 320, 90);
+          canvasCtx.fillStyle = '#fff';
+          canvasCtx.font = '18px Arial';
+          canvasCtx.fillText(`LUNGES: ${lungeCounter}`, 12, 28);
+          canvasCtx.fillText(`STAGE: ${lungeStage}`, 12, 56);
+          canvasCtx.fillText(`SIDE: ${lungeSide}`, 12, 84);
+        } else if (currentMode === 'raises') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftElbow = results.poseLandmarks[13];
+          const leftWrist = results.poseLandmarks[15];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightElbow = results.poseLandmarks[14];
+          const rightWrist = results.poseLandmarks[16];
+
+          if (leftShoulder && leftElbow && leftWrist && rightShoulder && rightElbow && rightWrist) {
+            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            if (averageAngle > 150) {
+              raiseStage = 'DOWN';
+            }
+
+            if (averageAngle < 80 && raiseStage === 'DOWN') {
+              raiseStage = 'UP';
+              raiseCounter += 1;
+            }
+
+            raiseRepsElement.textContent = raiseCounter;
+            raiseStageElement.textContent = raiseStage;
+            raiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+
+          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          canvasCtx.fillRect(0, 0, 280, 80);
+          canvasCtx.fillStyle = '#fff';
+          canvasCtx.font = '18px Arial';
+          canvasCtx.fillText(`RAISES: ${raiseCounter}`, 12, 28);
+          canvasCtx.fillText(`STAGE: ${raiseStage}`, 12, 56);
+        } else {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftElbow = results.poseLandmarks[13];
+          const leftHip = results.poseLandmarks[23];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightElbow = results.poseLandmarks[14];
+          const rightHip = results.poseLandmarks[24];
+
+          if (leftShoulder && leftElbow && leftHip && rightShoulder && rightElbow && rightHip) {
+            const leftAngle = calculateAngle(leftHip, leftShoulder, leftElbow);
+            const rightAngle = calculateAngle(rightHip, rightShoulder, rightElbow);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            if (averageAngle > 70) {
+              sideRaiseStage = 'UP';
+            }
+
+            if (averageAngle < 25 && sideRaiseStage === 'UP') {
+              sideRaiseStage = 'DOWN';
+              sideRaiseCounter += 1;
+            }
+
+            sideRaiseRepsElement.textContent = sideRaiseCounter;
+            sideRaiseStageElement.textContent = sideRaiseStage;
+            sideRaiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+
+          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+          canvasCtx.fillRect(0, 0, 280, 80);
+          canvasCtx.fillStyle = '#fff';
+          canvasCtx.font = '18px Arial';
+          canvasCtx.fillText(`SIDE RAISES: ${sideRaiseCounter}`, 12, 28);
+          canvasCtx.fillText(`STAGE: ${sideRaiseStage}`, 12, 56);
+        }
+      }
+      canvasCtx.restore();
+    }
+
+    const pose = new Pose({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+      },
+    });
+
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+    pose.onResults(onResults);
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await pose.send({image: videoElement});
+      },
+      width: 640,
+      height: 480,
+    });
+    camera.start();
+  </script>
+</body>
+</html>
