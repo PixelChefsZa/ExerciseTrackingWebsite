@@ -48,9 +48,9 @@
       justify-content: space-between;
       align-items: center;
       pointer-events: none;
-      padding: 12px;
+      padding: clamp(8px, 1.4vh, 16px);
       z-index: 2;
-      gap: 10px;
+      gap: clamp(8px, 1.2vh, 12px);
     }
 
     .top-controls {
@@ -58,20 +58,21 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: clamp(6px, 1vh, 10px);
       pointer-events: none;
-      transform: translateY(-6%);
+      transform: translateY(-8%);
     }
 
     .bottom-controls {
+      position: absolute;
+      bottom: clamp(8px, 6vh, 64px);
+      left: 0;
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      margin-top: auto;
-      padding-bottom: max(8px, 2vh);
+      padding-bottom: max(5px, 1vh);
       pointer-events: none;
-      transform: translateY(-4%);
     }
 
     header {
@@ -84,22 +85,22 @@
     }
 
     header h1 {
-      margin: 0 0 6px;
-      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      margin: 0 0 4px;
+      font-size: clamp(1.1rem, 2vw, 1.7rem);
     }
 
     header p {
       margin: 0;
-      font-size: clamp(0.95rem, 1.8vw, 1rem);
+      font-size: clamp(0.8rem, 1.4vw, 0.95rem);
       opacity: 0.9;
     }
 
     .mode-switch {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: clamp(4px, 0.8vw, 6px);
       justify-content: center;
-      max-width: 920px;
+      max-width: min(92vw, 920px);
       margin: 0 auto;
       pointer-events: auto;
     }
@@ -108,10 +109,10 @@
       border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(10, 10, 10, 0.72);
       color: #fff;
-      padding: 8px 11px;
+      padding: clamp(6px, 1vw, 8px) clamp(8px, 1.2vw, 11px);
       border-radius: 999px;
       cursor: pointer;
-      font-size: 0.84rem;
+      font-size: clamp(0.72rem, 1vw, 0.84rem);
       line-height: 1.1;
       white-space: nowrap;
       backdrop-filter: blur(6px);
@@ -125,7 +126,7 @@
 
     .status {
       display: flex;
-      gap: 8px;
+      gap: clamp(6px, 1vw, 8px);
       flex-wrap: wrap;
       justify-content: center;
       width: min(100%, 920px);
@@ -136,24 +137,24 @@
     .status > div {
       background: rgba(10, 10, 10, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: 8px 10px;
+      padding: clamp(6px, 0.9vw, 8px) clamp(8px, 1vw, 10px);
       border-radius: 10px;
-      min-width: 90px;
-      flex: 1 1 90px;
+      min-width: clamp(72px, 8vw, 90px);
+      flex: 1 1 clamp(72px, 8vw, 90px);
       text-align: center;
-      max-width: 150px;
+      max-width: clamp(120px, 14vw, 150px);
       backdrop-filter: blur(6px);
     }
 
     .status strong {
       display: block;
-      font-size: 0.72rem;
-      margin-bottom: 3px;
+      font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+      margin-bottom: 2px;
       opacity: 0.9;
     }
 
     .status div div {
-      font-size: 0.95rem;
+      font-size: clamp(0.8rem, 1vw, 0.95rem);
       font-weight: 700;
     }
 
@@ -174,8 +175,8 @@
       }
 
       .top-controls {
-        gap: 8px;
-        transform: translateY(-3%);
+        gap: 6px;
+        transform: translateY(0);
       }
 
       .mode-switch {
@@ -191,8 +192,8 @@
       .bottom-controls {
         width: 100%;
         justify-content: center;
-        padding-bottom: max(6px, 1.2vh);
-        transform: translateY(-2%);
+        padding-bottom: max(2px, 0.4vh);
+        transform: translateY(-10%);
       }
 
       .status {
@@ -201,10 +202,11 @@
         overflow-x: auto;
         justify-content: flex-start;
         padding-bottom: 2px;
+        width: 100%;
       }
 
       .status > div {
-        min-width: 94px;
+        min-width: clamp(78px, 12vw, 94px);
         flex: 0 0 auto;
         max-width: none;
       }
@@ -235,7 +237,7 @@
       }
 
       .status > div {
-        min-width: 86px;
+        min-width: clamp(74px, 16vw, 86px);
         flex: 0 0 auto;
       }
 
@@ -246,13 +248,17 @@
   </style>
 </head>
 <body>
+  <!-- Main app container -->
   <div class="app-shell">
+    <!-- Camera/video layer -->
     <div class="video-layer">
       <canvas id="output" width="640" height="480"></canvas>
       <video id="video" style="display:none"></video>
     </div>
 
+    <!-- Overlay UI layer -->
     <div class="ui-layer">
+      <!-- Top header and mode buttons -->
       <div class="top-controls">
         <header>
           <h1>Pose Counter</h1>
@@ -268,6 +274,7 @@
         </div>
       </div>
 
+      <!-- Bottom stats and exercise information -->
       <div class="bottom-controls">
         <div class="status" id="curlStats">
           <div>
