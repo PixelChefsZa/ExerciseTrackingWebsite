@@ -65,7 +65,7 @@
 
     .bottom-controls {
       position: absolute;
-      bottom: clamp(8px, 6vh, 64px);
+      bottom: clamp(10px, 7.5vh, 80px);
       left: 0;
       width: 100%;
       display: flex;
@@ -522,14 +522,6 @@
 
           const totalCounter = leftCounter + rightCounter;
           totalRepsElement.textContent = totalCounter;
-
-          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-          canvasCtx.fillRect(0, 0, 320, 100);
-          canvasCtx.fillStyle = '#fff';
-          canvasCtx.font = '18px Arial';
-          canvasCtx.fillText(`LEFT: ${leftCounter}`, 12, 28);
-          canvasCtx.fillText(`RIGHT: ${rightCounter}`, 12, 56);
-          canvasCtx.fillText(`TOTAL: ${totalCounter}`, 12, 84);
         } else if (currentMode === 'squats') {
           const leftHip = results.poseLandmarks[23];
           const leftKnee = results.poseLandmarks[25];
@@ -549,14 +541,7 @@
             squatRepsElement.textContent = squatCounter;
             squatAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
-
-          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-          canvasCtx.fillRect(0, 0, 280, 80);
-          canvasCtx.fillStyle = '#fff';
-          canvasCtx.font = '18px Arial';
-          canvasCtx.fillText(`SQUATS: ${squatCounter}`, 12, 28);
-          canvasCtx.fillText(`STAGE: ${squatStage}`, 12, 56);
-            } else if (currentMode === 'lunges') {
+        } else if (currentMode === 'lunges') {
           const leftHip = results.poseLandmarks[23];
           const leftKnee = results.poseLandmarks[25];
           const leftAnkle = results.poseLandmarks[27];
@@ -588,14 +573,6 @@
             lungeStageElement.textContent = lungeStage;
             lungeSideElement.textContent = lungeSide;
           }
-
-          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-          canvasCtx.fillRect(0, 0, 320, 90);
-          canvasCtx.fillStyle = '#fff';
-          canvasCtx.font = '18px Arial';
-          canvasCtx.fillText(`LUNGES: ${lungeCounter}`, 12, 28);
-          canvasCtx.fillText(`STAGE: ${lungeStage}`, 12, 56);
-          canvasCtx.fillText(`SIDE: ${lungeSide}`, 12, 84);
         } else if (currentMode === 'raises') {
           const leftShoulder = results.poseLandmarks[11];
           const leftElbow = results.poseLandmarks[13];
@@ -622,13 +599,6 @@
             raiseStageElement.textContent = raiseStage;
             raiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
-
-          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-          canvasCtx.fillRect(0, 0, 280, 80);
-          canvasCtx.fillStyle = '#fff';
-          canvasCtx.font = '18px Arial';
-          canvasCtx.fillText(`RAISES: ${raiseCounter}`, 12, 28);
-          canvasCtx.fillText(`STAGE: ${raiseStage}`, 12, 56);
         } else {
           const leftShoulder = results.poseLandmarks[11];
           const leftElbow = results.poseLandmarks[13];
@@ -655,13 +625,6 @@
             sideRaiseStageElement.textContent = sideRaiseStage;
             sideRaiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
-
-          canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-          canvasCtx.fillRect(0, 0, 280, 80);
-          canvasCtx.fillStyle = '#fff';
-          canvasCtx.font = '18px Arial';
-          canvasCtx.fillText(`SIDE RAISES: ${sideRaiseCounter}`, 12, 28);
-          canvasCtx.fillText(`STAGE: ${sideRaiseStage}`, 12, 56);
         }
       }
       canvasCtx.restore();
