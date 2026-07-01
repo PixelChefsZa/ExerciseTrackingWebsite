@@ -68,7 +68,7 @@
       bottom: clamp(10px, 7.5vh, 80px);
       left: 50%;
       width: min(76vw, 702px);
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       display: flex;
       justify-content: center;
       align-items: flex-end;
@@ -181,20 +181,31 @@
       }
 
       .mode-switch {
-        gap: 5px;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 3px;
+        width: 100%;
+        max-width: 100%;
+        justify-content: stretch;
+        transform: scale(0.95);
+        transform-origin: top center;
       }
 
       .mode-btn {
-        padding: 7px 9px;
-        font-size: 0.8rem;
+        min-width: 0;
+        padding: 5px 3px;
+        font-size: clamp(0.46rem, 1.7vw, 0.64rem);
+        line-height: 1;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
 
       .bottom-controls {
         width: min(84vw, 780px);
         justify-content: center;
         padding-bottom: max(2px, 0.4vh);
-        transform: translate(-50%, -10%);
+        transform: translate(-50%, -50%) scale(0.9);
+        transform-origin: bottom center;
       }
 
       .status {
@@ -223,14 +234,13 @@
       }
 
       .mode-switch {
-        flex-direction: row;
-        flex-wrap: wrap;
         align-items: center;
-        justify-content: center;
+        justify-content: stretch;
       }
 
       .mode-btn {
         width: auto;
+        min-height: 34px;
       }
 
       .status {
@@ -273,6 +283,7 @@
           <button id="modeRaises" class="mode-btn" type="button">Lateral Raises</button>
           <button id="modeSideRaises" class="mode-btn" type="button">Side Lateral Raises</button>
           <button id="modeCrunches" class="mode-btn" type="button">Standing Crunches</button>
+          <button id="modeJacks" class="mode-btn" type="button">Jumping Jacks</button>
         </div>
       </div>
 
@@ -375,6 +386,24 @@
             <div id="crunchAngle">0°</div>
           </div>
         </div>
+        <div class="status" id="jackStats" style="display: none;">
+          <div>
+            <strong>Reps</strong>
+            <div id="jackReps">0</div>
+          </div>
+          <div>
+            <strong>Stage</strong>
+            <div id="jackStage">Closed</div>
+          </div>
+          <div>
+            <strong>Arms</strong>
+            <div id="jackArms">Down</div>
+          </div>
+          <div>
+            <strong>Feet</strong>
+            <div id="jackFeet">In</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -392,6 +421,7 @@
     const raiseStats = document.getElementById('raiseStats');
     const sideRaiseStats = document.getElementById('sideRaiseStats');
     const crunchStats = document.getElementById('crunchStats');
+    const jackStats = document.getElementById('jackStats');
     const leftRepsElement = document.getElementById('leftReps');
     const rightRepsElement = document.getElementById('rightReps');
     const totalRepsElement = document.getElementById('totalReps');
@@ -412,12 +442,17 @@
     const crunchRepsElement = document.getElementById('crunchReps');
     const crunchStageElement = document.getElementById('crunchStage');
     const crunchAngleElement = document.getElementById('crunchAngle');
+    const jackRepsElement = document.getElementById('jackReps');
+    const jackStageElement = document.getElementById('jackStage');
+    const jackArmsElement = document.getElementById('jackArms');
+    const jackFeetElement = document.getElementById('jackFeet');
     const modeCurlsButton = document.getElementById('modeCurls');
     const modeSquatsButton = document.getElementById('modeSquats');
     const modeLungesButton = document.getElementById('modeLunges');
     const modeRaisesButton = document.getElementById('modeRaises');
     const modeSideRaisesButton = document.getElementById('modeSideRaises');
     const modeCrunchesButton = document.getElementById('modeCrunches');
+    const modeJacksButton = document.getElementById('modeJacks');
 
     let leftCounter = 0;
     let rightCounter = 0;
@@ -434,6 +469,8 @@
     let sideRaiseStage = 'DOWN';
     let crunchCounter = 0;
     let crunchStage = 'UP';
+    let jackCounter = 0;
+    let jackStage = 'CLOSED';
     let currentMode = 'curls';
 
     function calculateAngle(a, b, c) {
@@ -481,12 +518,14 @@
       raiseStats.style.display = mode === 'raises' ? 'flex' : 'none';
       sideRaiseStats.style.display = mode === 'sideRaises' ? 'flex' : 'none';
       crunchStats.style.display = mode === 'crunches' ? 'flex' : 'none';
+      jackStats.style.display = mode === 'jacks' ? 'flex' : 'none';
       modeCurlsButton.classList.toggle('active', isCurls);
       modeSquatsButton.classList.toggle('active', isSquats);
       modeLungesButton.classList.toggle('active', mode === 'lunges');
       modeRaisesButton.classList.toggle('active', mode === 'raises');
       modeSideRaisesButton.classList.toggle('active', mode === 'sideRaises');
       modeCrunchesButton.classList.toggle('active', mode === 'crunches');
+      modeJacksButton.classList.toggle('active', mode === 'jacks');
     }
 
     modeCurlsButton.addEventListener('click', () => setMode('curls'));
@@ -495,6 +534,7 @@
     modeRaisesButton.addEventListener('click', () => setMode('raises'));
     modeSideRaisesButton.addEventListener('click', () => setMode('sideRaises'));
     modeCrunchesButton.addEventListener('click', () => setMode('crunches'));
+    modeJacksButton.addEventListener('click', () => setMode('jacks'));
 
     function onResults(results) {
       const frameWidth = results.image?.width || videoElement.videoWidth || canvasElement.width;
@@ -653,6 +693,46 @@
             sideRaiseRepsElement.textContent = sideRaiseCounter;
             sideRaiseStageElement.textContent = sideRaiseStage;
             sideRaiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'jacks') {
+          const leftShoulder = results.poseLandmarks[11];
+          const rightShoulder = results.poseLandmarks[12];
+          const leftWrist = results.poseLandmarks[15];
+          const rightWrist = results.poseLandmarks[16];
+          const leftHip = results.poseLandmarks[23];
+          const rightHip = results.poseLandmarks[24];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (
+            leftShoulder &&
+            rightShoulder &&
+            leftWrist &&
+            rightWrist &&
+            leftHip &&
+            rightHip &&
+            leftAnkle &&
+            rightAnkle
+          ) {
+            const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+            const hipWidth = Math.abs(leftHip.x - rightHip.x);
+            const ankleWidth = Math.abs(leftAnkle.x - rightAnkle.x);
+            const armsUp = leftWrist.y < leftShoulder.y && rightWrist.y < rightShoulder.y;
+            const armsDown = leftWrist.y > leftShoulder.y && rightWrist.y > rightShoulder.y;
+            const feetOut = ankleWidth > shoulderWidth * 1.25;
+            const feetIn = ankleWidth < hipWidth * 1.35;
+
+            if (armsUp && feetOut && jackStage === 'CLOSED') {
+              jackStage = 'OPEN';
+              jackCounter += 1;
+            } else if (armsDown && feetIn && jackStage === 'OPEN') {
+              jackStage = 'CLOSED';
+            }
+
+            jackRepsElement.textContent = jackCounter;
+            jackStageElement.textContent = jackStage === 'OPEN' ? 'Open' : 'Closed';
+            jackArmsElement.textContent = armsUp ? 'Up' : 'Down';
+            jackFeetElement.textContent = feetOut ? 'Out' : 'In';
           }
         } else if (currentMode === 'crunches') {
           const leftShoulder = results.poseLandmarks[11];
