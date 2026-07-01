@@ -183,7 +183,7 @@
       pointer-events: none;
       backdrop-filter: blur(6px);
       display: none;
-      transform: translateX(-50%);
+      transform: translateX(-50%) scale(0.9);
     }
 
     .training-clock.active {
@@ -432,7 +432,7 @@
       .training-clock {
         top: 96px;
         left: 50%;
-        transform: translateX(-50%) scale(0.9);
+        transform: translateX(-50%) scale(0.81);
         transform-origin: top center;
       }
 
@@ -748,6 +748,7 @@
     let trainingTimerId = null;
     let trainingResults = [];
     let draggedStartButton = false;
+    let suppressTrainingClick = false;
 
     const trainingExercises = [
       { mode: 'curls', name: 'Arm Curls' },
@@ -908,6 +909,7 @@
       trainingDock.style.top = '';
       trainingDock.style.right = '';
       trainingDock.style.bottom = '';
+      trainingDock.style.transform = '';
     }
 
     function setTrainingControlsVisible(isSessionVisible) {
@@ -1195,19 +1197,21 @@
       skipToTrainingResults();
     });
 
-    trainingDock.addEventListener('pointerdown', (event) => {
-      if (event.target.closest('button')) {
-        return;
+    trainingDock.addEventListener('click', (event) => {
+      if (suppressTrainingClick) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressTrainingClick = false;
       }
+    }, true);
 
+    trainingDock.addEventListener('pointerdown', (event) => {
       const shellRect = document.querySelector('.app-shell').getBoundingClientRect();
       const dockRect = trainingDock.getBoundingClientRect();
       const offsetX = event.clientX - dockRect.left;
       const offsetY = event.clientY - dockRect.top;
       const startX = event.clientX;
       const startY = event.clientY;
-
-      trainingDock.setPointerCapture(event.pointerId);
 
       function moveButton(moveEvent) {
         const deltaX = Math.abs(moveEvent.clientX - startX);
@@ -1219,28 +1223,35 @@
 
         if (deltaX > 4 || deltaY > 4) {
           draggedStartButton = true;
+          suppressTrainingClick = true;
+        }
+
+        if (!draggedStartButton) {
+          return;
         }
 
         trainingDock.style.left = `${nextLeft}px`;
         trainingDock.style.top = `${nextTop}px`;
         trainingDock.style.right = 'auto';
         trainingDock.style.bottom = 'auto';
+        trainingDock.style.transform = 'none';
       }
 
       function stopDrag() {
-        trainingDock.removeEventListener('pointermove', moveButton);
-        trainingDock.removeEventListener('pointerup', stopDrag);
-        trainingDock.removeEventListener('pointercancel', stopDrag);
+        window.removeEventListener('pointermove', moveButton);
+        window.removeEventListener('pointerup', stopDrag);
+        window.removeEventListener('pointercancel', stopDrag);
         if (draggedStartButton) {
           window.setTimeout(() => {
             draggedStartButton = false;
+            suppressTrainingClick = false;
           }, 120);
         }
       }
 
-      trainingDock.addEventListener('pointermove', moveButton);
-      trainingDock.addEventListener('pointerup', stopDrag);
-      trainingDock.addEventListener('pointercancel', stopDrag);
+      window.addEventListener('pointermove', moveButton);
+      window.addEventListener('pointerup', stopDrag);
+      window.addEventListener('pointercancel', stopDrag);
     });
 
     function onResults(results) {
