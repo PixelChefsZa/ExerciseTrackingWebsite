@@ -66,8 +66,9 @@
     .bottom-controls {
       position: absolute;
       bottom: clamp(10px, 7.5vh, 80px);
-      left: 0;
-      width: 100%;
+      left: 50%;
+      width: min(76vw, 702px);
+      transform: translateX(-50%);
       display: flex;
       justify-content: center;
       align-items: flex-end;
@@ -126,10 +127,10 @@
 
     .status {
       display: flex;
-      gap: clamp(6px, 1vw, 8px);
+      gap: clamp(4px, 0.8vw, 6px);
       flex-wrap: wrap;
       justify-content: center;
-      width: min(100%, 920px);
+      width: min(100%, 702px);
       margin: 0 auto;
       pointer-events: auto;
     }
@@ -137,12 +138,12 @@
     .status > div {
       background: rgba(10, 10, 10, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: clamp(6px, 0.9vw, 8px) clamp(8px, 1vw, 10px);
+      padding: clamp(5px, 0.7vw, 7px) clamp(6px, 0.9vw, 8px);
       border-radius: 10px;
-      min-width: clamp(72px, 8vw, 90px);
-      flex: 1 1 clamp(72px, 8vw, 90px);
+      min-width: clamp(54px, 5.4vw, 64px);
+      flex: 1 1 clamp(54px, 5.4vw, 64px);
       text-align: center;
-      max-width: clamp(120px, 14vw, 150px);
+      max-width: clamp(90px, 10.8vw, 108px);
       backdrop-filter: blur(6px);
     }
 
@@ -190,10 +191,10 @@
       }
 
       .bottom-controls {
-        width: 100%;
+        width: min(84vw, 780px);
         justify-content: center;
         padding-bottom: max(2px, 0.4vh);
-        transform: translateY(-10%);
+        transform: translate(-50%, -10%);
       }
 
       .status {
