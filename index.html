@@ -173,7 +173,7 @@
     .training-clock {
       position: absolute;
       top: clamp(84px, 15vh, 132px);
-      right: clamp(10px, 2vw, 22px);
+      left: 50%;
       min-width: 118px;
       padding: 8px 10px;
       border: 1px solid rgba(255, 255, 255, 0.18);
@@ -183,6 +183,7 @@
       pointer-events: none;
       backdrop-filter: blur(6px);
       display: none;
+      transform: translateX(-50%);
     }
 
     .training-clock.active {
@@ -204,18 +205,19 @@
 
     .training-dock {
       position: absolute;
-      right: clamp(14px, 3vw, 30px);
-      bottom: clamp(18px, 4vh, 40px);
+      left: 50%;
+      bottom: clamp(150px, 28vh, 240px);
       z-index: 4;
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 6px;
       max-width: min(360px, 86vw);
       padding: 6px;
       pointer-events: auto;
       touch-action: none;
       user-select: none;
+      transform: translateX(-50%);
     }
 
     .training-action {
@@ -429,14 +431,15 @@
 
       .training-clock {
         top: 96px;
-        right: 10px;
-        transform: scale(0.9);
-        transform-origin: top right;
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        transform-origin: top center;
       }
 
       .training-dock {
         max-width: min(330px, 88vw);
         gap: 4px;
+        bottom: clamp(132px, 30vh, 190px);
       }
 
       .training-action {
@@ -900,6 +903,13 @@
       trainingTimerElement.textContent = formatTime(trainingSecondsLeft);
     }
 
+    function resetTrainingDockPosition() {
+      trainingDock.style.left = '';
+      trainingDock.style.top = '';
+      trainingDock.style.right = '';
+      trainingDock.style.bottom = '';
+    }
+
     function setTrainingControlsVisible(isSessionVisible) {
       startTrainingButton.classList.toggle('is-hidden', isSessionVisible);
       pauseTrainingButton.classList.toggle('is-hidden', !isSessionVisible);
@@ -1077,6 +1087,7 @@
       trainingActive = false;
       trainingPaused = false;
       trainingClock.classList.remove('active');
+      resetTrainingDockPosition();
       setTrainingControlsVisible(false);
       startTrainingButton.textContent = 'Start Training';
       pauseTrainingButton.textContent = 'Pause';
@@ -1098,6 +1109,7 @@
       resultsOverlay.classList.remove('show');
       resultsOverlay.setAttribute('aria-hidden', 'true');
       trainingClock.classList.add('active');
+      resetTrainingDockPosition();
       setTrainingControlsVisible(true);
       startTrainingButton.textContent = 'Training...';
       pauseTrainingButton.textContent = 'Pause';
@@ -1124,6 +1136,7 @@
       trainingActive = false;
       trainingPaused = false;
       trainingClock.classList.remove('active');
+      resetTrainingDockPosition();
       setTrainingControlsVisible(false);
       startTrainingButton.textContent = 'Start Training';
       pauseTrainingButton.textContent = 'Pause';
