@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pose Counter</title>
   <style>
+    :root {
+      color-scheme: dark;
+      font-size: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -15,27 +24,45 @@
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
+      padding: 16px 12px 24px;
     }
 
     header {
-      margin: 20px 0 10px;
+      margin: 8px 0 12px;
       text-align: center;
+      max-width: 720px;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+    }
+
+    header p {
+      margin: 0;
+      font-size: clamp(0.95rem, 1.8vw, 1rem);
+      opacity: 0.9;
     }
 
     .mode-switch {
       display: flex;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
       margin-bottom: 12px;
+      max-width: 900px;
     }
 
     .mode-btn {
       border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(255, 255, 255, 0.08);
       color: #fff;
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 999px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 0.95rem;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .mode-btn.active {
@@ -46,33 +73,87 @@
 
     .status {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 12px;
       flex-wrap: wrap;
       justify-content: center;
+      width: min(100%, 900px);
     }
 
-    .status div {
+    .status > div {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: 12px 18px;
+      padding: 10px 12px;
       border-radius: 12px;
-      min-width: 120px;
+      min-width: 110px;
+      flex: 1 1 110px;
       text-align: center;
+      max-width: 170px;
+    }
+
+    .status strong {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      opacity: 0.9;
+    }
+
+    .status div div {
+      font-size: 1rem;
+      font-weight: 700;
     }
 
     #output {
-      width: min(90vw, 720px);
+      width: min(100%, 720px);
       max-width: 100%;
+      aspect-ratio: 4 / 3;
+      height: auto;
       border-radius: 16px;
       background: #000;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 760px) {
+      body {
+        padding: 12px 10px 20px;
+      }
+
+      .mode-switch {
+        gap: 6px;
+      }
+
+      .mode-btn {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+      }
+
       .status {
+        gap: 8px;
+      }
+
+      .status > div {
+        min-width: 0;
+        flex: 1 1 calc(50% - 8px);
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px 8px 16px;
+      }
+
+      .mode-switch {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .mode-btn {
+        width: 100%;
+      }
+
+      .status > div {
+        flex: 1 1 100%;
       }
     }
   </style>
