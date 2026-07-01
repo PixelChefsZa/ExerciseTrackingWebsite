@@ -170,6 +170,206 @@
       transform: translateZ(0);
     }
 
+    .training-clock {
+      position: absolute;
+      top: clamp(84px, 15vh, 132px);
+      right: clamp(10px, 2vw, 22px);
+      min-width: 118px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      background: rgba(10, 10, 10, 0.72);
+      text-align: center;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+      display: none;
+    }
+
+    .training-clock.active {
+      display: block;
+    }
+
+    .training-clock strong {
+      display: block;
+      font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+      margin-bottom: 3px;
+      opacity: 0.9;
+    }
+
+    .training-clock div {
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .training-dock {
+      position: absolute;
+      right: clamp(14px, 3vw, 30px);
+      bottom: clamp(18px, 4vh, 40px);
+      z-index: 4;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      max-width: min(360px, 86vw);
+      padding: 6px;
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .training-action {
+      border: 1px solid rgba(0, 255, 170, 0.6);
+      border-radius: 999px;
+      background: rgba(0, 255, 170, 0.92);
+      color: #05140f;
+      cursor: grab;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 12px 16px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+    }
+
+    .training-action.secondary {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+    }
+
+    .training-action.is-hidden {
+      display: none;
+    }
+
+    .training-action:active {
+      cursor: grabbing;
+    }
+
+    .results-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(14px, 4vw, 32px);
+      background: rgba(0, 0, 0, 0.62);
+      pointer-events: auto;
+    }
+
+    .results-overlay.show {
+      display: flex;
+    }
+
+    .results-panel {
+      width: min(92vw, 720px);
+      max-height: min(86vh, 720px);
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      background: rgba(10, 10, 10, 0.9);
+      padding: clamp(16px, 3vw, 24px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .results-header h2 {
+      margin: 0;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+    }
+
+    .results-total {
+      margin: 0 0 16px;
+      color: #00ffaa;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 800;
+    }
+
+    .results-feedback {
+      border: 1px solid rgba(0, 255, 170, 0.24);
+      border-radius: 10px;
+      background: rgba(0, 255, 170, 0.08);
+      margin-bottom: 14px;
+      padding: 12px;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      font-size: clamp(1.45rem, 4vw, 2rem);
+      line-height: 1;
+    }
+
+    .star {
+      color: rgba(255, 255, 255, 0.25);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .star.filled {
+      color: #ffd84d;
+    }
+
+    .feedback-title {
+      margin: 0 0 4px;
+      font-size: clamp(1rem, 2.4vw, 1.25rem);
+      font-weight: 800;
+    }
+
+    .feedback-message {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.35;
+      opacity: 0.9;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .result-card {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px;
+    }
+
+    .result-card strong,
+    .result-card span {
+      display: block;
+    }
+
+    .result-card strong {
+      font-size: 0.78rem;
+      opacity: 0.86;
+    }
+
+    .result-card span {
+      margin-top: 6px;
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+
+    .close-summary-btn {
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 12px;
+    }
+
     @media (max-width: 760px) {
       body {
         padding: 10px 8px 16px;
@@ -225,6 +425,23 @@
 
       #output {
         width: min(100%, 1000px);
+      }
+
+      .training-clock {
+        top: 96px;
+        right: 10px;
+        transform: scale(0.9);
+        transform-origin: top right;
+      }
+
+      .training-dock {
+        max-width: min(330px, 88vw);
+        gap: 4px;
+      }
+
+      .training-action {
+        font-size: 0.78rem;
+        padding: 9px 10px;
       }
     }
 
@@ -285,6 +502,11 @@
           <button id="modeCrunches" class="mode-btn" type="button">Standing Crunches</button>
           <button id="modeJacks" class="mode-btn" type="button">Jumping Jacks</button>
         </div>
+      </div>
+
+      <div class="training-clock" id="trainingClock">
+        <strong id="trainingExercise">Training</strong>
+        <div id="trainingTimer">1:00</div>
       </div>
 
       <!-- Bottom stats and exercise information -->
@@ -406,6 +628,34 @@
         </div>
       </div>
     </div>
+
+    <div id="trainingDock" class="training-dock">
+      <button id="startTraining" class="training-action" type="button">Start Training</button>
+      <button id="pauseTraining" class="training-action secondary is-hidden" type="button">Pause</button>
+      <button id="stopTraining" class="training-action secondary is-hidden" type="button">Stop</button>
+      <button id="restartTraining" class="training-action secondary is-hidden" type="button">Restart</button>
+      <button id="showResults" class="training-action secondary is-hidden" type="button">Results</button>
+    </div>
+
+    <div id="resultsOverlay" class="results-overlay" aria-hidden="true">
+      <div class="results-panel">
+        <div class="results-header">
+          <h2>Workout Complete</h2>
+          <button id="closeSummary" class="close-summary-btn" type="button">Close</button>
+        </div>
+        <div class="results-feedback">
+          <div class="star-rating" id="starRating" aria-label="1 star rating">
+            <span class="star filled">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+          </div>
+          <p class="feedback-title" id="feedbackTitle">Great start!</p>
+          <p class="feedback-message" id="feedbackMessage">Every rep counts. Come back stronger next round.</p>
+        </div>
+        <p class="results-total" id="resultsTotal">Total Reps: 0</p>
+        <div class="results-grid" id="resultsGrid"></div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -453,6 +703,22 @@
     const modeSideRaisesButton = document.getElementById('modeSideRaises');
     const modeCrunchesButton = document.getElementById('modeCrunches');
     const modeJacksButton = document.getElementById('modeJacks');
+    const trainingDock = document.getElementById('trainingDock');
+    const startTrainingButton = document.getElementById('startTraining');
+    const pauseTrainingButton = document.getElementById('pauseTraining');
+    const stopTrainingButton = document.getElementById('stopTraining');
+    const restartTrainingButton = document.getElementById('restartTraining');
+    const showResultsButton = document.getElementById('showResults');
+    const trainingClock = document.getElementById('trainingClock');
+    const trainingExerciseElement = document.getElementById('trainingExercise');
+    const trainingTimerElement = document.getElementById('trainingTimer');
+    const resultsOverlay = document.getElementById('resultsOverlay');
+    const resultsTotalElement = document.getElementById('resultsTotal');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const starRating = document.getElementById('starRating');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const closeSummaryButton = document.getElementById('closeSummary');
 
     let leftCounter = 0;
     let rightCounter = 0;
@@ -472,6 +738,23 @@
     let jackCounter = 0;
     let jackStage = 'CLOSED';
     let currentMode = 'curls';
+    let trainingActive = false;
+    let trainingPaused = false;
+    let trainingIndex = 0;
+    let trainingSecondsLeft = 60;
+    let trainingTimerId = null;
+    let trainingResults = [];
+    let draggedStartButton = false;
+
+    const trainingExercises = [
+      { mode: 'curls', name: 'Arm Curls' },
+      { mode: 'squats', name: 'Squats' },
+      { mode: 'lunges', name: 'Forward Lunges' },
+      { mode: 'raises', name: 'Lateral Raises' },
+      { mode: 'sideRaises', name: 'Side Lateral Raises' },
+      { mode: 'crunches', name: 'Standing Crunches' },
+      { mode: 'jacks', name: 'Jumping Jacks' },
+    ];
 
     function calculateAngle(a, b, c) {
       const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
@@ -528,13 +811,424 @@
       modeJacksButton.classList.toggle('active', mode === 'jacks');
     }
 
-    modeCurlsButton.addEventListener('click', () => setMode('curls'));
-    modeSquatsButton.addEventListener('click', () => setMode('squats'));
-    modeLungesButton.addEventListener('click', () => setMode('lunges'));
-    modeRaisesButton.addEventListener('click', () => setMode('raises'));
-    modeSideRaisesButton.addEventListener('click', () => setMode('sideRaises'));
-    modeCrunchesButton.addEventListener('click', () => setMode('crunches'));
-    modeJacksButton.addEventListener('click', () => setMode('jacks'));
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+    }
+
+    function getExerciseReps(mode) {
+      if (mode === 'curls') {
+        return leftCounter + rightCounter;
+      }
+      if (mode === 'squats') {
+        return squatCounter;
+      }
+      if (mode === 'lunges') {
+        return lungeCounter;
+      }
+      if (mode === 'raises') {
+        return raiseCounter;
+      }
+      if (mode === 'sideRaises') {
+        return sideRaiseCounter;
+      }
+      if (mode === 'crunches') {
+        return crunchCounter;
+      }
+      if (mode === 'jacks') {
+        return jackCounter;
+      }
+      return 0;
+    }
+
+    function resetExercise(mode) {
+      if (mode === 'curls') {
+        leftCounter = 0;
+        rightCounter = 0;
+        leftStage = 'None';
+        rightStage = 'None';
+        leftRepsElement.textContent = '0';
+        rightRepsElement.textContent = '0';
+        totalRepsElement.textContent = '0';
+        leftStageElement.textContent = 'None';
+        rightStageElement.textContent = 'None';
+      } else if (mode === 'squats') {
+        squatCounter = 0;
+        squatStage = 'UP';
+        squatRepsElement.textContent = '0';
+        squatStageElement.textContent = 'None';
+        squatAngleElement.textContent = '0 deg';
+      } else if (mode === 'lunges') {
+        lungeCounter = 0;
+        lungeStage = 'None';
+        lungeSide = '-';
+        lungeRepsElement.textContent = '0';
+        lungeStageElement.textContent = 'None';
+        lungeSideElement.textContent = '-';
+      } else if (mode === 'raises') {
+        raiseCounter = 0;
+        raiseStage = 'DOWN';
+        raiseRepsElement.textContent = '0';
+        raiseStageElement.textContent = 'None';
+        raiseAngleElement.textContent = '0 deg';
+      } else if (mode === 'sideRaises') {
+        sideRaiseCounter = 0;
+        sideRaiseStage = 'DOWN';
+        sideRaiseRepsElement.textContent = '0';
+        sideRaiseStageElement.textContent = 'None';
+        sideRaiseAngleElement.textContent = '0 deg';
+      } else if (mode === 'crunches') {
+        crunchCounter = 0;
+        crunchStage = 'UP';
+        crunchRepsElement.textContent = '0';
+        crunchStageElement.textContent = 'None';
+        crunchAngleElement.textContent = '0 deg';
+      } else if (mode === 'jacks') {
+        jackCounter = 0;
+        jackStage = 'CLOSED';
+        jackRepsElement.textContent = '0';
+        jackStageElement.textContent = 'Closed';
+        jackArmsElement.textContent = 'Down';
+        jackFeetElement.textContent = 'In';
+      }
+    }
+
+    function updateTrainingClock() {
+      const exercise = trainingExercises[trainingIndex];
+      trainingExerciseElement.textContent = exercise ? exercise.name : 'Training';
+      trainingTimerElement.textContent = formatTime(trainingSecondsLeft);
+    }
+
+    function setTrainingControlsVisible(isSessionVisible) {
+      startTrainingButton.classList.toggle('is-hidden', isSessionVisible);
+      pauseTrainingButton.classList.toggle('is-hidden', !isSessionVisible);
+      stopTrainingButton.classList.toggle('is-hidden', !isSessionVisible);
+      restartTrainingButton.classList.toggle('is-hidden', !isSessionVisible);
+      showResultsButton.classList.toggle('is-hidden', !isSessionVisible);
+    }
+
+    function startSegmentTimer() {
+      window.clearInterval(trainingTimerId);
+      trainingTimerId = window.setInterval(() => {
+        if (trainingPaused) {
+          return;
+        }
+
+        trainingSecondsLeft -= 1;
+        updateTrainingClock();
+
+        if (trainingSecondsLeft <= 0) {
+          completeExerciseSegment();
+        }
+      }, 1000);
+    }
+
+    function startExerciseSegment() {
+      const exercise = trainingExercises[trainingIndex];
+      if (!exercise) {
+        finishTrainingSession();
+        return;
+      }
+
+      resetExercise(exercise.mode);
+      setMode(exercise.mode);
+      trainingSecondsLeft = 60;
+      updateTrainingClock();
+      startSegmentTimer();
+    }
+
+    function completeExerciseSegment() {
+      window.clearInterval(trainingTimerId);
+      trainingTimerId = null;
+
+      const exercise = trainingExercises[trainingIndex];
+      trainingResults.push({
+        mode: exercise.mode,
+        name: exercise.name,
+        reps: getExerciseReps(exercise.mode),
+      });
+
+      trainingIndex += 1;
+      startExerciseSegment();
+    }
+
+    function captureCurrentExerciseResult() {
+      const exercise = trainingExercises[trainingIndex];
+      if (!exercise || trainingResults.some((result) => result.mode === exercise.mode)) {
+        return;
+      }
+
+      trainingResults.push({
+        mode: exercise.mode,
+        name: exercise.name,
+        reps: getExerciseReps(exercise.mode),
+      });
+    }
+
+    function fillMissingTrainingResults() {
+      const savedModes = new Set(trainingResults.map((result) => result.mode));
+
+      trainingExercises.forEach((exercise) => {
+        if (!savedModes.has(exercise.mode)) {
+          trainingResults.push({
+            mode: exercise.mode,
+            name: exercise.name,
+            reps: exercise.mode === currentMode ? getExerciseReps(exercise.mode) : 0,
+          });
+        }
+      });
+    }
+
+    function getWorkoutFeedback(totalReps) {
+      const feedbackOptions = {
+        1: [
+          {
+            title: 'Good start.',
+            message: 'You showed up and got moving. Next time, aim to beat this score by just a few reps.',
+          },
+          {
+            title: 'First round banked.',
+            message: 'That was a real effort. Reset, recover, and come back ready to push the pace.',
+          },
+          {
+            title: 'You are building it.',
+            message: 'The base is there. Keep practicing the flow and those reps will climb.',
+          },
+        ],
+        2: [
+          {
+            title: 'Nice work!',
+            message: 'Solid session. You kept the workout moving and put up a strong total.',
+          },
+          {
+            title: 'Strong effort.',
+            message: 'That is a good score. A little more speed or consistency can turn this into a top-tier run.',
+          },
+          {
+            title: 'You found a rhythm.',
+            message: 'Good control across the workout. Next target: finish even stronger.',
+          },
+        ],
+        3: [
+          {
+            title: 'Outstanding work!',
+            message: 'That was a high-output session. You crushed the circuit and earned every star.',
+          },
+          {
+            title: 'Excellent performance!',
+            message: 'Huge total. Your pace and consistency were seriously impressive.',
+          },
+          {
+            title: 'Workout smashed.',
+            message: 'Top-tier result. That is the kind of effort that makes the scoreboard glow.',
+          },
+        ],
+      };
+
+      const rating = totalReps >= 140 ? 3 : totalReps >= 70 ? 2 : 1;
+      const options = feedbackOptions[rating];
+      const selectedFeedback = options[Math.floor(Math.random() * options.length)];
+
+      return { rating, ...selectedFeedback };
+    }
+
+    function updateWorkoutFeedback(totalReps) {
+      const feedback = getWorkoutFeedback(totalReps);
+      const stars = starRating.querySelectorAll('.star');
+
+      stars.forEach((star, index) => {
+        star.classList.toggle('filled', index < feedback.rating);
+      });
+
+      starRating.setAttribute('aria-label', `${feedback.rating} star rating`);
+      feedbackTitle.textContent = feedback.title;
+      feedbackMessage.textContent = feedback.message;
+    }
+
+    function renderTrainingSummary() {
+      const totalReps = trainingResults.reduce((total, result) => total + result.reps, 0);
+      resultsTotalElement.textContent = `Total Reps: ${totalReps}`;
+      updateWorkoutFeedback(totalReps);
+      resultsGrid.innerHTML = '';
+
+      trainingResults.forEach((result) => {
+        const card = document.createElement('div');
+        const label = document.createElement('strong');
+        const reps = document.createElement('span');
+        card.className = 'result-card';
+        label.textContent = result.name;
+        reps.textContent = result.reps;
+        card.append(label, reps);
+        resultsGrid.append(card);
+      });
+    }
+
+    function finishTrainingSession(options = {}) {
+      const { includeCurrent = false, fillMissing = false } = options;
+      window.clearInterval(trainingTimerId);
+      trainingTimerId = null;
+      if (includeCurrent) {
+        captureCurrentExerciseResult();
+      }
+      if (fillMissing) {
+        fillMissingTrainingResults();
+      }
+      trainingActive = false;
+      trainingPaused = false;
+      trainingClock.classList.remove('active');
+      setTrainingControlsVisible(false);
+      startTrainingButton.textContent = 'Start Training';
+      pauseTrainingButton.textContent = 'Pause';
+      renderTrainingSummary();
+      resultsOverlay.classList.add('show');
+      resultsOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function startTrainingSession() {
+      if (trainingActive) {
+        return;
+      }
+
+      window.clearInterval(trainingTimerId);
+      trainingActive = true;
+      trainingPaused = false;
+      trainingIndex = 0;
+      trainingResults = [];
+      resultsOverlay.classList.remove('show');
+      resultsOverlay.setAttribute('aria-hidden', 'true');
+      trainingClock.classList.add('active');
+      setTrainingControlsVisible(true);
+      startTrainingButton.textContent = 'Training...';
+      pauseTrainingButton.textContent = 'Pause';
+      startExerciseSegment();
+    }
+
+    function pauseTrainingSession() {
+      if (!trainingActive) {
+        return;
+      }
+
+      trainingPaused = !trainingPaused;
+      pauseTrainingButton.textContent = trainingPaused ? 'Resume' : 'Pause';
+      trainingExerciseElement.textContent = trainingPaused ? 'Paused' : trainingExercises[trainingIndex].name;
+    }
+
+    function stopTrainingSession() {
+      if (!trainingActive) {
+        return;
+      }
+
+      window.clearInterval(trainingTimerId);
+      trainingTimerId = null;
+      trainingActive = false;
+      trainingPaused = false;
+      trainingClock.classList.remove('active');
+      setTrainingControlsVisible(false);
+      startTrainingButton.textContent = 'Start Training';
+      pauseTrainingButton.textContent = 'Pause';
+    }
+
+    function restartTrainingSession() {
+      window.clearInterval(trainingTimerId);
+      trainingTimerId = null;
+      trainingActive = false;
+      trainingPaused = false;
+      startTrainingSession();
+    }
+
+    function skipToTrainingResults() {
+      if (trainingActive) {
+        finishTrainingSession({ includeCurrent: true, fillMissing: true });
+      } else {
+        fillMissingTrainingResults();
+        renderTrainingSummary();
+        resultsOverlay.classList.add('show');
+        resultsOverlay.setAttribute('aria-hidden', 'false');
+      }
+    }
+
+    modeCurlsButton.addEventListener('click', () => !trainingActive && setMode('curls'));
+    modeSquatsButton.addEventListener('click', () => !trainingActive && setMode('squats'));
+    modeLungesButton.addEventListener('click', () => !trainingActive && setMode('lunges'));
+    modeRaisesButton.addEventListener('click', () => !trainingActive && setMode('raises'));
+    modeSideRaisesButton.addEventListener('click', () => !trainingActive && setMode('sideRaises'));
+    modeCrunchesButton.addEventListener('click', () => !trainingActive && setMode('crunches'));
+    modeJacksButton.addEventListener('click', () => !trainingActive && setMode('jacks'));
+
+    closeSummaryButton.addEventListener('click', () => {
+      resultsOverlay.classList.remove('show');
+      resultsOverlay.setAttribute('aria-hidden', 'true');
+    });
+
+    startTrainingButton.addEventListener('click', () => {
+      startTrainingSession();
+      draggedStartButton = false;
+    });
+
+    pauseTrainingButton.addEventListener('click', () => {
+      pauseTrainingSession();
+    });
+
+    stopTrainingButton.addEventListener('click', () => {
+      stopTrainingSession();
+    });
+
+    restartTrainingButton.addEventListener('click', () => {
+      restartTrainingSession();
+    });
+
+    showResultsButton.addEventListener('click', () => {
+      skipToTrainingResults();
+    });
+
+    trainingDock.addEventListener('pointerdown', (event) => {
+      if (event.target.closest('button')) {
+        return;
+      }
+
+      const shellRect = document.querySelector('.app-shell').getBoundingClientRect();
+      const dockRect = trainingDock.getBoundingClientRect();
+      const offsetX = event.clientX - dockRect.left;
+      const offsetY = event.clientY - dockRect.top;
+      const startX = event.clientX;
+      const startY = event.clientY;
+
+      trainingDock.setPointerCapture(event.pointerId);
+
+      function moveButton(moveEvent) {
+        const deltaX = Math.abs(moveEvent.clientX - startX);
+        const deltaY = Math.abs(moveEvent.clientY - startY);
+        const maxLeft = shellRect.width - dockRect.width;
+        const maxTop = shellRect.height - dockRect.height;
+        const nextLeft = Math.min(Math.max(moveEvent.clientX - shellRect.left - offsetX, 0), maxLeft);
+        const nextTop = Math.min(Math.max(moveEvent.clientY - shellRect.top - offsetY, 0), maxTop);
+
+        if (deltaX > 4 || deltaY > 4) {
+          draggedStartButton = true;
+        }
+
+        trainingDock.style.left = `${nextLeft}px`;
+        trainingDock.style.top = `${nextTop}px`;
+        trainingDock.style.right = 'auto';
+        trainingDock.style.bottom = 'auto';
+      }
+
+      function stopDrag() {
+        trainingDock.removeEventListener('pointermove', moveButton);
+        trainingDock.removeEventListener('pointerup', stopDrag);
+        trainingDock.removeEventListener('pointercancel', stopDrag);
+        if (draggedStartButton) {
+          window.setTimeout(() => {
+            draggedStartButton = false;
+          }, 120);
+        }
+      }
+
+      trainingDock.addEventListener('pointermove', moveButton);
+      trainingDock.addEventListener('pointerup', stopDrag);
+      trainingDock.addEventListener('pointercancel', stopDrag);
+    });
 
     function onResults(results) {
       const frameWidth = results.image?.width || videoElement.videoWidth || canvasElement.width;
