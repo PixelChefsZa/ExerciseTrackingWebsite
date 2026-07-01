@@ -203,6 +203,45 @@
       line-height: 1;
     }
 
+    .exercise-cue {
+      position: absolute;
+      top: clamp(142px, 24vh, 212px);
+      left: 50%;
+      z-index: 4;
+      color: #00ffaa;
+      display: none;
+      font-size: clamp(1.45rem, 5vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0;
+      line-height: 1;
+      pointer-events: none;
+      text-align: center;
+      text-shadow: 0 5px 24px rgba(0, 0, 0, 0.64);
+      transform: translateX(-50%);
+      width: min(92vw, 920px);
+    }
+
+    .exercise-cue.active {
+      display: block;
+      animation: exerciseCuePulse 5s ease-in-out both;
+    }
+
+    @keyframes exerciseCuePulse {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.96);
+      }
+      18%,
+      72% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px) scale(0.98);
+      }
+    }
+
     .training-dock {
       position: absolute;
       left: 50%;
@@ -436,6 +475,11 @@
         transform-origin: top center;
       }
 
+      .exercise-cue {
+        top: 150px;
+        font-size: clamp(1.05rem, 6vw, 2rem);
+      }
+
       .training-dock {
         max-width: min(330px, 88vw);
         gap: 4px;
@@ -511,6 +555,7 @@
         <strong id="trainingExercise">Training</strong>
         <div id="trainingTimer">1:00</div>
       </div>
+      <div class="exercise-cue" id="exerciseCue" aria-live="polite"></div>
 
       <!-- Bottom stats and exercise information -->
       <div class="bottom-controls">
@@ -715,6 +760,7 @@
     const trainingClock = document.getElementById('trainingClock');
     const trainingExerciseElement = document.getElementById('trainingExercise');
     const trainingTimerElement = document.getElementById('trainingTimer');
+    const exerciseCue = document.getElementById('exerciseCue');
     const resultsOverlay = document.getElementById('resultsOverlay');
     const resultsTotalElement = document.getElementById('resultsTotal');
     const resultsGrid = document.getElementById('resultsGrid');
@@ -746,6 +792,7 @@
     let trainingIndex = 0;
     let trainingSecondsLeft = 60;
     let trainingTimerId = null;
+    let trainingCueTimeoutId = null;
     let trainingResults = [];
     let draggedStartButton = false;
     let suppressTrainingClick = false;
@@ -936,6 +983,20 @@
       }, 1000);
     }
 
+    function showExerciseCue(exerciseName) {
+      window.clearTimeout(trainingCueTimeoutId);
+
+      // Restart the CSS animation even if the same exercise name is shown twice in a row.
+      exerciseCue.classList.remove('active');
+      void exerciseCue.offsetWidth; // force reflow so the animation restarts cleanly
+      exerciseCue.textContent = `START ${exerciseName.toUpperCase()}`;
+      exerciseCue.classList.add('active');
+
+      trainingCueTimeoutId = window.setTimeout(() => {
+        exerciseCue.classList.remove('active');
+      }, 5000);
+    }
+
     function startExerciseSegment() {
       const exercise = trainingExercises[trainingIndex];
       if (!exercise) {
@@ -948,6 +1009,7 @@
       trainingSecondsLeft = 60;
       updateTrainingClock();
       startSegmentTimer();
+      showExerciseCue(exercise.name);
     }
 
     function completeExerciseSegment() {
@@ -1080,6 +1142,8 @@
       const { includeCurrent = false, fillMissing = false } = options;
       window.clearInterval(trainingTimerId);
       trainingTimerId = null;
+      window.clearTimeout(trainingCueTimeoutId);
+      exerciseCue.classList.remove('active');
       if (includeCurrent) {
         captureCurrentExerciseResult();
       }
@@ -1126,6 +1190,11 @@
       trainingPaused = !trainingPaused;
       pauseTrainingButton.textContent = trainingPaused ? 'Resume' : 'Pause';
       trainingExerciseElement.textContent = trainingPaused ? 'Paused' : trainingExercises[trainingIndex].name;
+
+      if (trainingPaused) {
+        window.clearTimeout(trainingCueTimeoutId);
+        exerciseCue.classList.remove('active');
+      }
     }
 
     function stopTrainingSession() {
@@ -1135,6 +1204,8 @@
 
       window.clearInterval(trainingTimerId);
       trainingTimerId = null;
+      window.clearTimeout(trainingCueTimeoutId);
+      exerciseCue.classList.remove('active');
       trainingActive = false;
       trainingPaused = false;
       trainingClock.classList.remove('active');
