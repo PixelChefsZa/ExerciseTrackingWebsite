@@ -162,6 +162,7 @@
       object-fit: cover;
       display: block;
       background: #000;
+      transform: translateZ(0);
     }
 
     @media (max-width: 760px) {
@@ -454,6 +455,16 @@
     modeSideRaisesButton.addEventListener('click', () => setMode('sideRaises'));
 
     function onResults(results) {
+      const frameWidth = results.image?.width || videoElement.videoWidth || canvasElement.width;
+      const frameHeight = results.image?.height || videoElement.videoHeight || canvasElement.height;
+
+      if (frameWidth && frameHeight) {
+        if (canvasElement.width !== frameWidth || canvasElement.height !== frameHeight) {
+          canvasElement.width = frameWidth;
+          canvasElement.height = frameHeight;
+        }
+      }
+
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
       canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
@@ -661,8 +672,6 @@
       onFrame: async () => {
         await pose.send({image: videoElement});
       },
-      width: 640,
-      height: 480,
     });
     camera.start();
   </script>
