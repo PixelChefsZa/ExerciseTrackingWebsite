@@ -272,6 +272,7 @@
           <button id="modeLunges" class="mode-btn" type="button">Forward Lunges</button>
           <button id="modeRaises" class="mode-btn" type="button">Lateral Raises</button>
           <button id="modeSideRaises" class="mode-btn" type="button">Side Lateral Raises</button>
+          <button id="modeCrunches" class="mode-btn" type="button">Standing Crunches</button>
         </div>
       </div>
 
@@ -359,6 +360,21 @@
             <div id="sideRaiseAngle">0°</div>
           </div>
         </div>
+
+        <div class="status" id="crunchStats" style="display: none;">
+          <div>
+            <strong>Reps</strong>
+            <div id="crunchReps">0</div>
+          </div>
+          <div>
+            <strong>Stage</strong>
+            <div id="crunchStage">None</div>
+          </div>
+          <div>
+            <strong>Bend Angle</strong>
+            <div id="crunchAngle">0°</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -373,6 +389,9 @@
     const curlStats = document.getElementById('curlStats');
     const squatStats = document.getElementById('squatStats');
     const lungeStats = document.getElementById('lungeStats');
+    const raiseStats = document.getElementById('raiseStats');
+    const sideRaiseStats = document.getElementById('sideRaiseStats');
+    const crunchStats = document.getElementById('crunchStats');
     const leftRepsElement = document.getElementById('leftReps');
     const rightRepsElement = document.getElementById('rightReps');
     const totalRepsElement = document.getElementById('totalReps');
@@ -390,11 +409,15 @@
     const sideRaiseRepsElement = document.getElementById('sideRaiseReps');
     const sideRaiseStageElement = document.getElementById('sideRaiseStage');
     const sideRaiseAngleElement = document.getElementById('sideRaiseAngle');
+    const crunchRepsElement = document.getElementById('crunchReps');
+    const crunchStageElement = document.getElementById('crunchStage');
+    const crunchAngleElement = document.getElementById('crunchAngle');
     const modeCurlsButton = document.getElementById('modeCurls');
     const modeSquatsButton = document.getElementById('modeSquats');
     const modeLungesButton = document.getElementById('modeLunges');
     const modeRaisesButton = document.getElementById('modeRaises');
     const modeSideRaisesButton = document.getElementById('modeSideRaises');
+    const modeCrunchesButton = document.getElementById('modeCrunches');
 
     let leftCounter = 0;
     let rightCounter = 0;
@@ -409,6 +432,8 @@
     let raiseStage = 'DOWN';
     let sideRaiseCounter = 0;
     let sideRaiseStage = 'DOWN';
+    let crunchCounter = 0;
+    let crunchStage = 'UP';
     let currentMode = 'curls';
 
     function calculateAngle(a, b, c) {
@@ -455,11 +480,13 @@
       lungeStats.style.display = mode === 'lunges' ? 'flex' : 'none';
       raiseStats.style.display = mode === 'raises' ? 'flex' : 'none';
       sideRaiseStats.style.display = mode === 'sideRaises' ? 'flex' : 'none';
+      crunchStats.style.display = mode === 'crunches' ? 'flex' : 'none';
       modeCurlsButton.classList.toggle('active', isCurls);
       modeSquatsButton.classList.toggle('active', isSquats);
       modeLungesButton.classList.toggle('active', mode === 'lunges');
       modeRaisesButton.classList.toggle('active', mode === 'raises');
       modeSideRaisesButton.classList.toggle('active', mode === 'sideRaises');
+      modeCrunchesButton.classList.toggle('active', mode === 'crunches');
     }
 
     modeCurlsButton.addEventListener('click', () => setMode('curls'));
@@ -467,6 +494,7 @@
     modeLungesButton.addEventListener('click', () => setMode('lunges'));
     modeRaisesButton.addEventListener('click', () => setMode('raises'));
     modeSideRaisesButton.addEventListener('click', () => setMode('sideRaises'));
+    modeCrunchesButton.addEventListener('click', () => setMode('crunches'));
 
     function onResults(results) {
       const frameWidth = results.image?.width || videoElement.videoWidth || canvasElement.width;
@@ -600,7 +628,7 @@
             raiseStageElement.textContent = raiseStage;
             raiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
-        } else {
+        } else if (currentMode === 'sideRaises') {
           const leftShoulder = results.poseLandmarks[11];
           const leftElbow = results.poseLandmarks[13];
           const leftHip = results.poseLandmarks[23];
@@ -625,6 +653,32 @@
             sideRaiseRepsElement.textContent = sideRaiseCounter;
             sideRaiseStageElement.textContent = sideRaiseStage;
             sideRaiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'crunches') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftHip = results.poseLandmarks[23];
+          const leftNose = results.poseLandmarks[0];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightHip = results.poseLandmarks[24];
+          const rightNose = results.poseLandmarks[0];
+
+          if (leftShoulder && leftHip && leftNose && rightShoulder && rightHip && rightNose) {
+            const leftAngle = calculateAngle(leftNose, leftShoulder, leftHip);
+            const rightAngle = calculateAngle(rightNose, rightShoulder, rightHip);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            if (averageAngle > 100) {
+              crunchStage = 'UP';
+            }
+
+            if (averageAngle < 50 && crunchStage === 'UP') {
+              crunchStage = 'BENT';
+              crunchCounter += 1;
+            }
+
+            crunchRepsElement.textContent = crunchCounter;
+            crunchStageElement.textContent = crunchStage;
+            crunchAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
         }
       }
