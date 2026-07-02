@@ -110,27 +110,42 @@
       border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(10, 10, 10, 0.72);
       color: #fff;
-      padding: clamp(6px, 1vw, 8px) clamp(8px, 1.2vw, 11px);
-      border-radius: 999px;
+      width: clamp(38px, 6.4vw, 52px);
+      height: clamp(38px, 6.4vw, 52px);
+      padding: clamp(7px, 1.1vw, 10px);
+      border-radius: 50%;
       cursor: pointer;
-      font-size: clamp(0.72rem, 1vw, 0.84rem);
-      line-height: 1.1;
-      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       backdrop-filter: blur(6px);
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .mode-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
     }
 
     .mode-btn.active {
       background: #00ffaa;
-      color: #05140f;
-      font-weight: 700;
+      border-color: #00ffaa;
+      transform: scale(1.06);
+    }
+
+    .mode-btn.active img {
+      filter: invert(1);
     }
 
     .status {
       display: flex;
-      gap: clamp(4px, 0.8vw, 6px);
+      gap: clamp(3px, 0.68vw, 5px);
       flex-wrap: wrap;
       justify-content: center;
-      width: min(100%, 702px);
+      width: min(100%, 597px);
       margin: 0 auto;
       pointer-events: auto;
     }
@@ -138,24 +153,24 @@
     .status > div {
       background: rgba(10, 10, 10, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: clamp(5px, 0.7vw, 7px) clamp(6px, 0.9vw, 8px);
-      border-radius: 10px;
-      min-width: clamp(54px, 5.4vw, 64px);
-      flex: 1 1 clamp(54px, 5.4vw, 64px);
+      padding: clamp(4px, 0.6vw, 6px) clamp(5px, 0.77vw, 7px);
+      border-radius: 8px;
+      min-width: clamp(46px, 4.6vw, 54px);
+      flex: 1 1 clamp(46px, 4.6vw, 54px);
       text-align: center;
-      max-width: clamp(90px, 10.8vw, 108px);
+      max-width: clamp(77px, 9.2vw, 92px);
       backdrop-filter: blur(6px);
     }
 
     .status strong {
       display: block;
-      font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+      font-size: clamp(0.53rem, 0.68vw, 0.61rem);
       margin-bottom: 2px;
       opacity: 0.9;
     }
 
     .status div div {
-      font-size: clamp(0.8rem, 1vw, 0.95rem);
+      font-size: clamp(0.68rem, 0.85vw, 0.81rem);
       font-weight: 700;
     }
 
@@ -170,20 +185,106 @@
       transform: translateZ(0);
     }
 
+    #output.fit-contain {
+      object-fit: contain;
+    }
+
+    .camera-controls {
+      position: absolute;
+      right: clamp(8px, 2.4vw, 18px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .camera-controls .zoom-btn {
+      width: clamp(32px, 4.6vw, 40px);
+      height: clamp(32px, 4.6vw, 40px);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+      line-height: 1;
+      padding: 0;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    .camera-controls .zoom-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .camera-controls .zoom-btn:not(:disabled):active {
+      transform: scale(0.92);
+    }
+
+    .camera-controls .zoom-level {
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #00ffaa;
+      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 4px 3px;
+      width: clamp(32px, 4.6vw, 40px);
+      text-align: center;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .camera-controls .divider {
+      width: 60%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.18);
+      margin: 3px 0;
+    }
+
+    .camera-controls .fit-btn {
+      border-radius: 10px;
+      width: clamp(32px, 4.6vw, 40px);
+      height: clamp(32px, 4.6vw, 40px);
+      padding: 0 2px;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: transform 0.1s ease;
+    }
+
+    .camera-controls .fit-btn:active {
+      transform: scale(0.92);
+    }
+
     .training-clock {
       position: absolute;
       top: clamp(84px, 15vh, 132px);
       left: 50%;
-      min-width: 118px;
-      padding: 8px 10px;
+      min-width: 100px;
+      padding: 7px 8px;
       border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 10px;
+      border-radius: 8px;
       background: rgba(10, 10, 10, 0.72);
       text-align: center;
       pointer-events: none;
       backdrop-filter: blur(6px);
       display: none;
-      transform: translateX(-50%) scale(0.9);
+      transform: translateX(-50%) scale(0.77);
     }
 
     .training-clock.active {
@@ -192,13 +293,13 @@
 
     .training-clock strong {
       display: block;
-      font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+      font-size: clamp(0.53rem, 0.68vw, 0.61rem);
       margin-bottom: 3px;
       opacity: 0.9;
     }
 
     .training-clock div {
-      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-size: clamp(1.15rem, 2.55vw, 1.7rem);
       font-weight: 800;
       line-height: 1;
     }
@@ -433,12 +534,12 @@
       }
 
       .mode-btn {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
         min-width: 0;
-        padding: 5px 3px;
-        font-size: clamp(0.46rem, 1.7vw, 0.64rem);
-        line-height: 1;
-        white-space: normal;
-        overflow-wrap: anywhere;
+        padding: 15%;
+        margin: 0 auto;
       }
 
       .bottom-controls {
@@ -450,7 +551,7 @@
       }
 
       .status {
-        gap: 6px;
+        gap: 5px;
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
@@ -459,7 +560,7 @@
       }
 
       .status > div {
-        min-width: clamp(78px, 12vw, 94px);
+        min-width: clamp(66px, 10.2vw, 80px);
         flex: 0 0 auto;
         max-width: none;
       }
@@ -471,7 +572,7 @@
       .training-clock {
         top: 96px;
         left: 50%;
-        transform: translateX(-50%) scale(0.81);
+        transform: translateX(-50%) scale(0.69);
         transform-origin: top center;
       }
 
@@ -490,6 +591,11 @@
         font-size: 0.78rem;
         padding: 9px 10px;
       }
+
+      .camera-controls {
+        right: 6px;
+        gap: 5px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -503,8 +609,8 @@
       }
 
       .mode-btn {
-        width: auto;
-        min-height: 34px;
+        width: 100%;
+        min-height: 0;
       }
 
       .status {
@@ -512,7 +618,7 @@
       }
 
       .status > div {
-        min-width: clamp(74px, 16vw, 86px);
+        min-width: clamp(63px, 13.6vw, 73px);
         flex: 0 0 auto;
       }
 
@@ -533,21 +639,29 @@
 
     <!-- Overlay UI layer -->
     <div class="ui-layer">
+      <div class="camera-controls" id="cameraControls">
+        <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+        <button id="zoomLevel" class="zoom-level" type="button" aria-label="Reset zoom to 1x" title="Tap to reset zoom">1.0x</button>
+        <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out" title="Zoom out" disabled>&minus;</button>
+        <div class="divider"></div>
+        <button id="fitToggle" class="fit-btn" type="button" aria-label="Switch to fit mode" title="Switch between fill and fit">Fit</button>
+      </div>
+
       <!-- Top header and mode buttons -->
       <div class="top-controls">
         <header>
-          <h1>Pose Counter</h1>
+          <h1 id="modeHeading">Arm Curls</h1>
           <p>Choose a mode and perform the exercise to count reps.</p>
         </header>
 
         <div class="mode-switch">
-          <button id="modeCurls" class="mode-btn active" type="button">Arm Curls</button>
-          <button id="modeSquats" class="mode-btn" type="button">Squats</button>
-          <button id="modeLunges" class="mode-btn" type="button">Forward Lunges</button>
-          <button id="modeRaises" class="mode-btn" type="button">Lateral Raises</button>
-          <button id="modeSideRaises" class="mode-btn" type="button">Side Lateral Raises</button>
-          <button id="modeCrunches" class="mode-btn" type="button">Standing Crunches</button>
-          <button id="modeJacks" class="mode-btn" type="button">Jumping Jacks</button>
+          <button id="modeCurls" class="mode-btn active" type="button" aria-label="Arm Curls" title="Arm Curls"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeSquats" class="mode-btn" type="button" aria-label="Squats" title="Squats"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFaUlEQVR42u1bS4gcVRQ9t3omiXGTBAMZxUQN8UNQkRAhLkzciEpAzCoLFV0IIYgfBBe6E9GNIAiCIOhqQAXF7MaIRBiMZDEEJRszYD4wQ8TIYKLJZKa7jou5Dx9FV3f1dNVM9fQ5UFTPq66eV/f37j3vFiAIgiAIgiAIgiAIgiAIgiAIgiAIQg1B0kiaJLGyQk9IjmTGGiQbkk71wm9k/r6pjTLkEVVZvp93k/yQ5BTJiySnSR4jeTj7XaFkyyf5Jsl55uN7kmNSQjXCf9uFnJJcJNmKjibJBb9+huQmXysUjkoS/l4XbhB8Hm74+dN2a4awfAV8HSmgE1JX0ALJOwclFCU1Fb6ZWYvkJgCP+XA3izYAKYBRAE/U+flqrwAXJgBsB7A5M1YEuwbF0+tuIbbC90kBIQr5eQbAlcxYEfwuBfRj9mYkmZjZZQAnXfitAkpLfB047mOp0pn+s6D9nuUseKbTLQ0dVxpavhLec+G2onogbVOITZPc6oWYquEy0lGSo/753S51wCTJHaIiSrb+zNgekp+T/I3kZZIXSE6QfCEi7AZK+FZT4SdmlvrnXQDGAFwHMBWNb/QF+1q7+4T+4/5TJE9G8Z0kZ0l+QfIwya1twtVICUdjaIm8SPivZuJ7q00G9LeHn1dI3leFFw5VCCLZcP7nAIATUd7fyOT6aZvxJoDTACYAXPTnYq9T8PMcgBNmNuecFIfF+sMi+rNbeLMA+9kswJIuBxdI7lkJT7CaWf8jAH5yK096tN50GVbfDimAde5RewGwyoV9pGaO8FokhKRHQyqr8g3KvB/AdjM7V2V2NVKT0JOS3AngaRdAEWG2Iou36CjDA8LvX8+sD2vSAxIza5I86q7fLDAvlmjxWYTf/czMLoXwuCbXgCjf3gxgGsU2X0J4+gbAGQC7AdzuxdqG6H72+Hz045r/9lsAFn0NWLMe0HDrfx7AlgLWH8LDnwBeNLMrkTI3AFhfwpzmzezGsBBtRnIdybMRu9kJITU9EoReReU6FNVwaCskeahg3h+unw79oLGQIoX2fQxb4TXZowL2x7SF0IeLk9wXcT1FhP+lhF8u6fZVgaarsDb8Q3KHK04bLv2EHhfiTm+2Tbvs9QbrfydaeLtRyuoLLbD4flDA+kNo+mW5a0zdYSssfPOWk1B4bekyj1B0/QhgEktth2mGHoip5xaAcwCOOZ2sHbIc63+9YMNtP3TyvkHwhNXygFNYonrTgpxOiuJNVnRPueQ0xRyw1OxVRwUkqyD8m7HUdGs9/P/EKYoix6hzONsAPOOCr23auhru2QwkF6qjeUOr+t11D8srpgC3/oYTXVMupFbFzzarLChTgPnW48MATvnwYo+GkHSZd/CsRQD3mtl5ZUPtOaDnSP5bQQYUMqs3BoG2sNVSgpmlJO8B8CyAB/E/l28d5rro370V7TdcWr7gTpjZky78dGhaS6quVEluITmTQ1+E11b/ILlNnFFxXii0AyY5R8M3bYzk8Q7UdQg9Bwch9Axi9fxSh+o5jH0U3yOU4yFG8g6SV3J6RIM3/Epy/VA311Zo/d/lhJ7QnjhP8gGFnmqEf6RA6HlZoaea0HMXyatu5Xmh51sJv4KK2c8/5ISesBbMkLxFL+VVI/yjOaEn7h96XHG/GpoihJ5OWc/7Cj3VLbwf51h/sPzzUaE20Cln3eJmoKcfyuF6Ev/ObQAOOcOZSAHlz+ca8jdswg7XQf9bHlAigjDHo7k12xyGpZfxhAprgE86cP5nSY6thWbaur4pHzbwDwB4FMDG6PIsgHEz+2uoXiNdDSX0c10eUF5R1m6OLVm+IAiCIAiCIAiCIAiCIAiCIAiDgv8AXmI7OboVYqkAAAAASUVORK5CYII=" alt="" /></button>
+          <button id="modeLunges" class="mode-btn" type="button" aria-label="Forward Lunges" title="Forward Lunges"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFeUlEQVR42u2cS4gcVRSGv1PdPUkm5uFC8BEfoEZBEF0FFCVk48ag6EqyEN27EDciBLJz4yK4UFyIEBcKQQi4MCCIYLIJgoYwijEPH/hACUQRmcl01++iT5FKp7u6a6aru2o8P1xqpvt21a3z3/O8twoCgUAgEAgEAoFAIBAIBAKBQCAQCAQClcKaNmBJLR93mrsHA3pmpqC0OsGbpGRMnyQ0oCLhZ7Nb0h7gGeBBYDPwM/ApcNTMliW1zKwXU3aKwvfjNklHNBpLkh7PmanAtMyOpEVJJ13QPUmrkrreVr1J0rKkvUHCdB0ukt50Aa8UaEBGwi+Sdjp5FlJcu/ATP97pgu9KSlWMjIRX/Lftut9n0oCxPQEsAJogaDDvt9//T4OA9WO3C3XSqM6AOyR1zCytuxlqAgE2o98EASNwroRA5e1HM1uVlNQ9O64zAZn9Pg6s+lg1AQEGfNygCdaIMPTtCEPnm4htk3TKBdwtSMSuSNrX1LpQ3UsROyV9WKAB3zYxC25iMe4x4CngAWAr/WLcceAjM/s3inEVZsXT6hdYW0liq6SXJX0u6aKks5KOSXo26xdOtzrh75Z0psD+v+cEtIKE6UZAJmm7pO9yYWjXS9I9//uKf/dG0xxw3Qlo+/HVMTlAmquU3tc0X1DngWaRzNOeFbcKIrksA97ftAw4qav5MTNJWgBu9nFOYtvvapqm132mWMlcxYKAOStPEBD4X5ugIKAiEoKA0IDwAeGEg4AgYBzSIGDOPsDrQI3xG+0NpgHLvhkrWz1r5chQrlGX7SobhYBMyLsk3Q1cAi4XLU26piTM+cmaWqpqrhi3CHwP3Or2fRKT2XUCfgd+Ai4A54GL9NePfwUumVk6eL0g4HoCtgBngV0lCBiHv4DfnIwTwGEz+3teJNSdgM1OwO0lCNAwm+/3OmxN4WtgH3B5Hr6h7lFQytWFmbKRU+ICb3tr5YjJzrsCPAS85oKf+XJm3QnoAJumrK15cjpOxpO+kbcbUdC12ArcMIHJ6ZWYcMmQzxadjJVZ+4K6EpCt82534Yzr217HdaD/BE7HTVJoQA473FQMezwpc8rn6W9NTIaYVct9lgJ76T9xM+jQMwIiERsQ3I6cmRlFwAdmdnDC6OqtAgIWgoDrCdg5EFoO67Pke4janoSNus9uwSxv574zZlhVrbsJKiIge2LmGzPrSkrz2e3AzMf7rBTIYdM8bjBpCAHDIh/zksMPBSQNYnWEFrXpv3ciCBjA9oIEDeBsyTJCtyBzXggCymkAwJIfJ81gewXn2jyP8kylPiBX8i09Li/p7xjT73TJ864WfDcXE9SuUvjuFNeyTNj1c2wao7mnS9j/UQRkv13cMAS4TU4l3QMcAG4qUG0bEERWTEuBR4aYGDkB/9CvlFKC5KJaz5YNYYLc7EjSw8BnBXZ8LXlBPgK6APxZsnZT5IQ7/nRN431ANvsPuvCX13GdVkEGvORrBi0mL8YVacC9fr7eLAtyVRCQmYPbfHZ1mH6dXcCZNZiMlREySIFDku4HnndCZ0JAlWForwJ1Vs4EnSzpgDMNGJVVp8BzwAHX4HbTCbARpHRLtN5AS12jPgG+8EirV1IDRtV6Uo+S9jTeB3B1kaQ3oAnTMEXHgBdKzv7MLJ7w8XScYBsYdxv4ciMQAHAEeHRA6K/T32ZiXLtoPmwh3XxG9nKfXTSzr3Kh7kQEuElJzOycpBeBw8CNQ7oeBd73SG4mrzuoJOTK7Wp4yWdrF3jHzN6dxrldqFrHuG6h/+LXfHn6DzM7VZbcWhJQIIDWOq85suS8hgx9JEGzlIlVLXAz6/msTeryFpNsPENMVbxlJRAIBAKBQCAQCAQCgUAgEAgEAoFAYKPhPyWcD0HPEAc3AAAAAElFTkSuQmCC" alt="" /></button>
+          <button id="modeRaises" class="mode-btn" type="button" aria-label="Lateral Raises" title="Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeSideRaises" class="mode-btn" type="button" aria-label="Side Lateral Raises" title="Side Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeCrunches" class="mode-btn" type="button" aria-label="Standing Crunches" title="Standing Crunches"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeJacks" class="mode-btn" type="button" aria-label="Jumping Jacks" title="Jumping Jacks"><img src="data:image/png;base64,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" alt="" /></button>
         </div>
       </div>
 
@@ -713,6 +827,10 @@
     const videoElement = document.getElementById('video');
     const canvasElement = document.getElementById('output');
     const canvasCtx = canvasElement.getContext('2d');
+    const zoomInButton = document.getElementById('zoomIn');
+    const zoomOutButton = document.getElementById('zoomOut');
+    const zoomLevelButton = document.getElementById('zoomLevel');
+    const fitToggleButton = document.getElementById('fitToggle');
     const curlStats = document.getElementById('curlStats');
     const squatStats = document.getElementById('squatStats');
     const lungeStats = document.getElementById('lungeStats');
@@ -745,6 +863,7 @@
     const jackArmsElement = document.getElementById('jackArms');
     const jackFeetElement = document.getElementById('jackFeet');
     const modeCurlsButton = document.getElementById('modeCurls');
+    const modeHeading = document.getElementById('modeHeading');
     const modeSquatsButton = document.getElementById('modeSquats');
     const modeLungesButton = document.getElementById('modeLunges');
     const modeRaisesButton = document.getElementById('modeRaises');
@@ -787,6 +906,11 @@
     let jackCounter = 0;
     let jackStage = 'CLOSED';
     let currentMode = 'curls';
+    let cameraZoom = 1;
+    let isFitMode = false;
+    const ZOOM_MIN = 1;
+    const ZOOM_MAX = 2.5;
+    const ZOOM_STEP = 0.1;
     let trainingActive = false;
     let trainingPaused = false;
     let trainingIndex = 0;
@@ -846,6 +970,10 @@
       currentMode = mode;
       const isCurls = mode === 'curls';
       const isSquats = mode === 'squats';
+      const exerciseInfo = trainingExercises.find((exercise) => exercise.mode === mode);
+      if (exerciseInfo) {
+        modeHeading.textContent = exerciseInfo.name;
+      }
       curlStats.style.display = isCurls ? 'flex' : 'none';
       squatStats.style.display = isSquats ? 'flex' : 'none';
       lungeStats.style.display = mode === 'lunges' ? 'flex' : 'none';
@@ -1242,6 +1370,39 @@
     modeCrunchesButton.addEventListener('click', () => !trainingActive && setMode('crunches'));
     modeJacksButton.addEventListener('click', () => !trainingActive && setMode('jacks'));
 
+    function updateZoomControls() {
+      zoomLevelButton.textContent = `${cameraZoom.toFixed(1)}x`;
+      zoomOutButton.disabled = cameraZoom <= ZOOM_MIN;
+      zoomInButton.disabled = cameraZoom >= ZOOM_MAX;
+    }
+
+    function setZoom(value) {
+      cameraZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, value));
+      updateZoomControls();
+    }
+
+    zoomInButton.addEventListener('click', () => setZoom(cameraZoom + ZOOM_STEP));
+    zoomOutButton.addEventListener('click', () => setZoom(cameraZoom - ZOOM_STEP));
+    zoomLevelButton.addEventListener('click', () => setZoom(1));
+
+    canvasElement.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault();
+        setZoom(cameraZoom + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+      },
+      { passive: false }
+    );
+
+    fitToggleButton.addEventListener('click', () => {
+      isFitMode = !isFitMode;
+      canvasElement.classList.toggle('fit-contain', isFitMode);
+      fitToggleButton.textContent = isFitMode ? 'Fill' : 'Fit';
+      fitToggleButton.setAttribute('aria-label', isFitMode ? 'Switch to fill mode' : 'Switch to fit mode');
+    });
+
+    updateZoomControls();
+
     closeSummaryButton.addEventListener('click', () => {
       resultsOverlay.classList.remove('show');
       resultsOverlay.setAttribute('aria-hidden', 'true');
@@ -1338,6 +1499,15 @@
 
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+      if (cameraZoom !== 1) {
+        const centerX = canvasElement.width / 2;
+        const centerY = canvasElement.height / 2;
+        canvasCtx.translate(centerX, centerY);
+        canvasCtx.scale(cameraZoom, cameraZoom);
+        canvasCtx.translate(-centerX, -centerY);
+      }
+
       canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
       if (results.poseLandmarks) {
