@@ -931,6 +931,15 @@
       { mode: 'jacks', name: 'Jumping Jacks' },
     ];
 
+    // MediaPipe Pose landmark indices 0-10 cover the face (nose, eyes, ears, mouth).
+    // We keep them out of the visual overlay entirely, while still leaving
+    // results.poseLandmarks untouched for any exercise-detection math that needs them.
+    const FACE_LANDMARK_INDICES = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+    function getBodyOnlyLandmarks(landmarks) {
+      return landmarks.map((landmark, index) => (FACE_LANDMARK_INDICES.has(index) ? undefined : landmark));
+    }
+
     function calculateAngle(a, b, c) {
       const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
       let angle = Math.abs((radians * 180.0) / Math.PI);
@@ -1511,11 +1520,12 @@
       canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
       if (results.poseLandmarks) {
-        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
+        const bodyLandmarks = getBodyOnlyLandmarks(results.poseLandmarks);
+        drawConnectors(canvasCtx, bodyLandmarks, POSE_CONNECTIONS, {
           color: '#00FFAA',
           lineWidth: 4,
         });
-        drawLandmarks(canvasCtx, results.poseLandmarks, {
+        drawLandmarks(canvasCtx, bodyLandmarks, {
           color: '#FF2C7A',
           lineWidth: 2,
           radius: 4,
