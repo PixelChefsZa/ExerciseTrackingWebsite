@@ -1639,6 +1639,9 @@
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
+      canvasCtx.translate(canvasElement.width, 0);
+      canvasCtx.scale(-1, 1);
+
       if (cameraZoom !== 1) {
         const centerX = canvasElement.width / 2;
         const centerY = canvasElement.height / 2;
