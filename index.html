@@ -3,11 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pixel Fit</title>
+  <title>Pixel Fit Online</title>
   <style>
     :root {
       color-scheme: dark;
       font-size: 16px;
+      /* Exercise button size: scaled so the 5-button row reads as roughly
+         the same width/scale as the "Choose a mode..." subheading beneath
+         the title, instead of shrinking to a tiny cluster on wide desktop
+         screens. Still bounded by clamp() so it can't overflow. */
+      --mbtn-size: clamp(40px, 4vw, 74px);
+      --mbtn-gap: clamp(6px, 1vw, 10px);
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --mbtn-size: clamp(40px, 9vw, 56px);
+        --mbtn-gap: clamp(4px, 1.5vw, 8px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --mbtn-size: clamp(42px, 12vw, 56px);
+        --mbtn-gap: clamp(4px, 1.5vw, 8px);
+      }
     }
 
     * {
@@ -66,13 +86,52 @@
     .bottom-controls {
       position: absolute;
       bottom: clamp(10px, 7.5vh, 80px);
-      left: 50%;
+      left: 0;
+      right: 0;
       width: min(76vw, 702px);
-      transform: translate(-50%, -50%);
+      margin-left: auto;
+      margin-right: auto;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding-bottom: max(5px, 1vh);
+      pointer-events: none;
+    }
+
+    .info-toggle-btn {
+      pointer-events: auto;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      padding: 4px 10px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .info-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .stats-wrap {
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding-bottom: max(5px, 1vh);
+      width: 100%;
+      overflow: hidden;
+      max-height: 200px;
+      opacity: 1;
+      transition: max-height 0.2s ease, opacity 0.15s ease, margin 0.2s ease;
+    }
+
+    .stats-wrap.collapsed {
+      max-height: 0;
+      opacity: 0;
       pointer-events: none;
     }
 
@@ -98,27 +157,78 @@
 
     .mode-switch {
       display: flex;
-      flex-wrap: wrap;
-      gap: clamp(4px, 0.8vw, 6px);
-      justify-content: center;
-      max-width: min(92vw, 920px);
+      flex-wrap: nowrap;
+      gap: var(--mbtn-gap);
+      justify-content: flex-start;
+      width: calc(var(--mbtn-size) * 5 + var(--mbtn-gap) * 4);
+      max-width: 92vw;
       margin: 0 auto;
+      padding: 6px 0;
       pointer-events: auto;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+      max-height: min(300px, 45vh);
+      transition: max-height 0.2s ease, opacity 0.15s ease, margin 0.2s ease, padding 0.2s ease;
+    }
+
+    .mode-switch::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mode-switch.dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
+    }
+
+    .mode-switch.collapsed {
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      margin: 0 auto;
+      pointer-events: none;
+    }
+
+    .toggle-exercises-btn {
+      pointer-events: auto;
+      display: block;
+      margin: 0 auto;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      padding: 5px 12px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .toggle-exercises-btn:active {
+      transform: scale(0.96);
     }
 
     .mode-btn {
       border: 1px solid rgba(255, 255, 255, 0.18);
       background: rgba(10, 10, 10, 0.72);
       color: #fff;
-      width: clamp(38px, 6.4vw, 52px);
-      height: clamp(38px, 6.4vw, 52px);
-      padding: clamp(7px, 1.1vw, 10px);
+      flex: 0 0 var(--mbtn-size);
+      width: var(--mbtn-size);
+      height: var(--mbtn-size);
+      padding: clamp(5px, 0.8vw, 7px);
       border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(6px);
+      scroll-snap-align: start;
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
 
@@ -138,6 +248,17 @@
 
     .mode-btn.active img {
       filter: invert(1);
+    }
+
+    .mode-btn.text-btn span {
+      pointer-events: none;
+      font-size: clamp(0.44rem, 0.7vw, 0.54rem);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .mode-btn.active.text-btn span {
+      color: #06251c;
     }
 
     .status {
@@ -200,6 +321,54 @@
       align-items: center;
       gap: 6px;
       pointer-events: auto;
+      max-height: min(320px, 90vh);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .camera-controls::-webkit-scrollbar {
+      display: none;
+    }
+
+    .rail-toggle-btn {
+      flex: 0 0 auto;
+      width: clamp(26px, 3.6vw, 32px);
+      height: clamp(26px, 3.6vw, 32px);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      backdrop-filter: blur(6px);
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    .rail-toggle-btn:active {
+      transform: scale(0.92);
+    }
+
+    .rail-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      max-height: 400px;
+      opacity: 1;
+      transition: max-height 0.2s ease, opacity 0.15s ease, margin 0.2s ease;
+    }
+
+    .rail-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .camera-controls .zoom-btn {
@@ -271,10 +440,96 @@
       transform: scale(0.92);
     }
 
+    .day-rail {
+      position: absolute;
+      left: clamp(8px, 2.4vw, 18px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+      max-height: min(320px, 90vh);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .day-rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-rail .day-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      width: calc(clamp(32px, 4.6vw, 40px) * 2 + 4px);
+    }
+
+    .day-rail .day-btn {
+      width: clamp(26px, 3.6vw, 32px);
+      height: clamp(26px, 3.6vw, 32px);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0;
+      backdrop-filter: blur(6px);
+      transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .day-rail .day-btn:active {
+      transform: scale(0.92);
+    }
+
+    .day-rail .day-btn.selected {
+      background: #00ffaa;
+      border-color: #00ffaa;
+      color: #06251c;
+    }
+
+    .day-rail .day-btn-last {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .day-rail .day-rail-divider {
+      width: 60%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.18);
+      margin: 3px 0;
+    }
+
+    .day-rail .all-btn {
+      border-radius: 10px;
+      width: clamp(32px, 4.6vw, 40px);
+      height: clamp(32px, 4.6vw, 40px);
+      padding: 0 2px;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: transform 0.1s ease;
+    }
+
+    .day-rail .all-btn:active {
+      transform: scale(0.92);
+    }
+
     .training-clock {
       position: absolute;
-      top: clamp(84px, 15vh, 132px);
+      top: clamp(150px, 24vh, 210px);
       left: 50%;
+      z-index: 6;
       min-width: 100px;
       padding: 7px 8px;
       border: 1px solid rgba(255, 255, 255, 0.18);
@@ -284,11 +539,19 @@
       pointer-events: none;
       backdrop-filter: blur(6px);
       display: none;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
       transform: translateX(-50%) scale(0.77);
     }
 
     .training-clock.active {
       display: block;
+      pointer-events: auto;
+    }
+
+    .training-clock:active {
+      cursor: grabbing;
     }
 
     .training-clock strong {
@@ -306,7 +569,7 @@
 
     .exercise-cue {
       position: absolute;
-      top: clamp(142px, 24vh, 212px);
+      top: clamp(215px, 32vh, 290px);
       left: 50%;
       z-index: 4;
       color: #00ffaa;
@@ -349,9 +612,10 @@
       bottom: clamp(150px, 28vh, 240px);
       z-index: 4;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       max-width: min(360px, 86vw);
       padding: 6px;
       pointer-events: auto;
@@ -370,12 +634,17 @@
       font-weight: 800;
       padding: 12px 16px;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+      white-space: nowrap;
     }
 
     .training-action.secondary {
       border-color: rgba(255, 255, 255, 0.22);
       background: rgba(10, 10, 10, 0.72);
       color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 7px 8px;
+      box-shadow: none;
     }
 
     .training-action.is-hidden {
@@ -512,6 +781,27 @@
       padding: 8px 12px;
     }
 
+    .day-plan-subtitle {
+      color: #00ffaa;
+      font-weight: 700;
+      margin: 0 0 12px !important;
+    }
+
+    .day-plan-list {
+      margin: 0 0 18px;
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.95rem;
+      line-height: 1.35;
+    }
+
+    .day-plan-start {
+      width: 100%;
+      cursor: pointer;
+    }
+
     @media (max-width: 760px) {
       body {
         padding: 10px 8px 16px;
@@ -522,23 +812,9 @@
         transform: translateY(0);
       }
 
-      .mode-switch {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 3px;
-        width: 100%;
-        max-width: 100%;
-        justify-content: stretch;
-        transform: scale(0.95);
-        transform-origin: top center;
-      }
-
       .mode-btn {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 1 / 1;
         min-width: 0;
-        padding: 15%;
+        padding: clamp(4px, 1.6vw, 7px);
         margin: 0 auto;
       }
 
@@ -546,7 +822,7 @@
         width: min(84vw, 780px);
         justify-content: center;
         padding-bottom: max(2px, 0.4vh);
-        transform: translate(-50%, -50%) scale(0.9);
+        transform: translateY(-50%) scale(0.9);
         transform-origin: bottom center;
       }
 
@@ -570,20 +846,20 @@
       }
 
       .training-clock {
-        top: 96px;
+        top: 218px;
         left: 50%;
         transform: translateX(-50%) scale(0.69);
         transform-origin: top center;
       }
 
       .exercise-cue {
-        top: 150px;
+        top: 278px;
         font-size: clamp(1.05rem, 6vw, 2rem);
       }
 
       .training-dock {
         max-width: min(330px, 88vw);
-        gap: 4px;
+        gap: 3px;
         bottom: clamp(132px, 30vh, 190px);
       }
 
@@ -592,9 +868,35 @@
         padding: 9px 10px;
       }
 
+      .training-action.secondary {
+        font-size: 0.56rem;
+        padding: 6px 6px;
+      }
+
       .camera-controls {
         right: 6px;
         gap: 5px;
+      }
+
+      .day-rail {
+        left: 6px;
+      }
+
+      .day-rail .day-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 0.6rem;
+      }
+
+      .day-rail .day-grid {
+        width: calc(22px * 2 + 4px);
+        gap: 3px;
+      }
+
+      .day-rail .all-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.52rem;
       }
     }
 
@@ -605,11 +907,10 @@
 
       .mode-switch {
         align-items: center;
-        justify-content: stretch;
+        justify-content: flex-start;
       }
 
       .mode-btn {
-        width: 100%;
         min-height: 0;
       }
 
@@ -768,28 +1069,64 @@
     <!-- Overlay UI layer -->
     <div class="ui-layer">
       <div class="camera-controls" id="cameraControls">
-        <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
-        <button id="zoomLevel" class="zoom-level" type="button" aria-label="Reset zoom to 1x" title="Tap to reset zoom">1.0x</button>
-        <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out" title="Zoom out" disabled>&minus;</button>
-        <div class="divider"></div>
-        <button id="fitToggle" class="fit-btn" type="button" aria-label="Switch to fit mode" title="Switch between fill and fit">Fit</button>
+        <button id="toggleCameraControls" class="rail-toggle-btn" type="button" aria-label="Toggle camera controls" title="Toggle camera controls" aria-expanded="true" aria-controls="cameraControlsBody">&#9776;</button>
+        <div class="rail-body" id="cameraControlsBody">
+          <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+          <button id="zoomLevel" class="zoom-level" type="button" aria-label="Reset zoom to 1x" title="Tap to reset zoom">1.0x</button>
+          <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out" title="Zoom out" disabled>&minus;</button>
+          <div class="divider"></div>
+          <button id="fitToggle" class="fit-btn" type="button" aria-label="Switch to fit mode" title="Switch between fill and fit">Fit</button>
+        </div>
+      </div>
+
+      <div class="day-rail" id="daySelector">
+        <button id="toggleDayRail" class="rail-toggle-btn" type="button" aria-label="Toggle day picker" title="Toggle day picker" aria-expanded="true" aria-controls="dayRailBody">&#9776;</button>
+        <div class="rail-body" id="dayRailBody">
+          <div class="day-grid">
+            <button class="day-btn" type="button" data-day-index="0" aria-label="Day 1 plan" title="Day 1 – Full Body Strength">1</button>
+            <button class="day-btn" type="button" data-day-index="1" aria-label="Day 2 plan" title="Day 2 – Cardio HIIT">2</button>
+            <button class="day-btn" type="button" data-day-index="2" aria-label="Day 3 plan" title="Day 3 – Lower Body">3</button>
+            <button class="day-btn" type="button" data-day-index="3" aria-label="Day 4 plan" title="Day 4 – Upper Body">4</button>
+            <button class="day-btn" type="button" data-day-index="4" aria-label="Day 5 plan" title="Day 5 – Athletic Conditioning">5</button>
+            <button class="day-btn" type="button" data-day-index="5" aria-label="Day 6 plan" title="Day 6 – Core">6</button>
+            <button class="day-btn day-btn-last" type="button" data-day-index="6" aria-label="Day 7 plan" title="Day 7 – Weekly Challenge">7</button>
+          </div>
+          <div class="day-rail-divider"></div>
+          <button id="showAllExercises" class="all-btn" type="button" aria-label="Show all exercises" title="Show all exercises">All</button>
+        </div>
       </div>
 
       <!-- Top header and mode buttons -->
       <div class="top-controls">
         <header>
           <h1 id="modeHeading">Arm Curls</h1>
-          <p>Choose a mode and perform the exercise to count reps.</p>
+          <p id="modeSubtitle">Choose a mode and perform the exercise to count reps.</p>
         </header>
 
-        <div class="mode-switch">
-          <button id="modeCurls" class="mode-btn active" type="button" aria-label="Arm Curls" title="Arm Curls"><img src="data:image/png;base64,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" alt="" /></button>
-          <button id="modeSquats" class="mode-btn" type="button" aria-label="Squats" title="Squats"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFaUlEQVR42u1bS4gcVRQ9t3omiXGTBAMZxUQN8UNQkRAhLkzciEpAzCoLFV0IIYgfBBe6E9GNIAiCIOhqQAXF7MaIRBiMZDEEJRszYD4wQ8TIYKLJZKa7jou5Dx9FV3f1dNVM9fQ5UFTPq66eV/f37j3vFiAIgiAIgiAIgiAIgiAIgiAIgiAIQg1B0kiaJLGyQk9IjmTGGiQbkk71wm9k/r6pjTLkEVVZvp93k/yQ5BTJiySnSR4jeTj7XaFkyyf5Jsl55uN7kmNSQjXCf9uFnJJcJNmKjibJBb9+huQmXysUjkoS/l4XbhB8Hm74+dN2a4awfAV8HSmgE1JX0ALJOwclFCU1Fb6ZWYvkJgCP+XA3izYAKYBRAE/U+flqrwAXJgBsB7A5M1YEuwbF0+tuIbbC90kBIQr5eQbAlcxYEfwuBfRj9mYkmZjZZQAnXfitAkpLfB047mOp0pn+s6D9nuUseKbTLQ0dVxpavhLec+G2onogbVOITZPc6oWYquEy0lGSo/753S51wCTJHaIiSrb+zNgekp+T/I3kZZIXSE6QfCEi7AZK+FZT4SdmlvrnXQDGAFwHMBWNb/QF+1q7+4T+4/5TJE9G8Z0kZ0l+QfIwya1twtVICUdjaIm8SPivZuJ7q00G9LeHn1dI3leFFw5VCCLZcP7nAIATUd7fyOT6aZvxJoDTACYAXPTnYq9T8PMcgBNmNuecFIfF+sMi+rNbeLMA+9kswJIuBxdI7lkJT7CaWf8jAH5yK096tN50GVbfDimAde5RewGwyoV9pGaO8FokhKRHQyqr8g3KvB/AdjM7V2V2NVKT0JOS3AngaRdAEWG2Iou36CjDA8LvX8+sD2vSAxIza5I86q7fLDAvlmjxWYTf/czMLoXwuCbXgCjf3gxgGsU2X0J4+gbAGQC7AdzuxdqG6H72+Hz045r/9lsAFn0NWLMe0HDrfx7AlgLWH8LDnwBeNLMrkTI3AFhfwpzmzezGsBBtRnIdybMRu9kJITU9EoReReU6FNVwaCskeahg3h+unw79oLGQIoX2fQxb4TXZowL2x7SF0IeLk9wXcT1FhP+lhF8u6fZVgaarsDb8Q3KHK04bLv2EHhfiTm+2Tbvs9QbrfydaeLtRyuoLLbD4flDA+kNo+mW5a0zdYSssfPOWk1B4bekyj1B0/QhgEktth2mGHoip5xaAcwCOOZ2sHbIc63+9YMNtP3TyvkHwhNXygFNYonrTgpxOiuJNVnRPueQ0xRyw1OxVRwUkqyD8m7HUdGs9/P/EKYoix6hzONsAPOOCr23auhru2QwkF6qjeUOr+t11D8srpgC3/oYTXVMupFbFzzarLChTgPnW48MATvnwYo+GkHSZd/CsRQD3mtl5ZUPtOaDnSP5bQQYUMqs3BoG2sNVSgpmlJO8B8CyAB/E/l28d5rro370V7TdcWr7gTpjZky78dGhaS6quVEluITmTQ1+E11b/ILlNnFFxXii0AyY5R8M3bYzk8Q7UdQg9Bwch9Axi9fxSh+o5jH0U3yOU4yFG8g6SV3J6RIM3/Epy/VA311Zo/d/lhJ7QnjhP8gGFnmqEf6RA6HlZoaea0HMXyatu5Xmh51sJv4KK2c8/5ISesBbMkLxFL+VVI/yjOaEn7h96XHG/GpoihJ5OWc/7Cj3VLbwf51h/sPzzUaE20Cln3eJmoKcfyuF6Ev/ObQAOOcOZSAHlz+ca8jdswg7XQf9bHlAigjDHo7k12xyGpZfxhAprgE86cP5nSY6thWbaur4pHzbwDwB4FMDG6PIsgHEz+2uoXiNdDSX0c10eUF5R1m6OLVm+IAiCIAiCIAiCIAiCIAiCIAiDgv8AXmI7OboVYqkAAAAASUVORK5CYII=" alt="" /></button>
-          <button id="modeLunges" class="mode-btn" type="button" aria-label="Forward Lunges" title="Forward Lunges"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFeUlEQVR42u2cS4gcVRSGv1PdPUkm5uFC8BEfoEZBEF0FFCVk48ag6EqyEN27EDciBLJz4yK4UFyIEBcKQQi4MCCIYLIJgoYwijEPH/hACUQRmcl01++iT5FKp7u6a6aru2o8P1xqpvt21a3z3/O8twoCgUAgEAgEAoFAIBAIBAKBQCAQCAQClcKaNmBJLR93mrsHA3pmpqC0OsGbpGRMnyQ0oCLhZ7Nb0h7gGeBBYDPwM/ApcNTMliW1zKwXU3aKwvfjNklHNBpLkh7PmanAtMyOpEVJJ13QPUmrkrreVr1J0rKkvUHCdB0ukt50Aa8UaEBGwi+Sdjp5FlJcu/ATP97pgu9KSlWMjIRX/Lftut9n0oCxPQEsAJogaDDvt9//T4OA9WO3C3XSqM6AOyR1zCytuxlqAgE2o98EASNwroRA5e1HM1uVlNQ9O64zAZn9Pg6s+lg1AQEGfNygCdaIMPTtCEPnm4htk3TKBdwtSMSuSNrX1LpQ3UsROyV9WKAB3zYxC25iMe4x4CngAWAr/WLcceAjM/s3inEVZsXT6hdYW0liq6SXJX0u6aKks5KOSXo26xdOtzrh75Z0psD+v+cEtIKE6UZAJmm7pO9yYWjXS9I9//uKf/dG0xxw3Qlo+/HVMTlAmquU3tc0X1DngWaRzNOeFbcKIrksA97ftAw4qav5MTNJWgBu9nFOYtvvapqm132mWMlcxYKAOStPEBD4X5ugIKAiEoKA0IDwAeGEg4AgYBzSIGDOPsDrQI3xG+0NpgHLvhkrWz1r5chQrlGX7SobhYBMyLsk3Q1cAi4XLU26piTM+cmaWqpqrhi3CHwP3Or2fRKT2XUCfgd+Ai4A54GL9NePfwUumVk6eL0g4HoCtgBngV0lCBiHv4DfnIwTwGEz+3teJNSdgM1OwO0lCNAwm+/3OmxN4WtgH3B5Hr6h7lFQytWFmbKRU+ICb3tr5YjJzrsCPAS85oKf+XJm3QnoAJumrK15cjpOxpO+kbcbUdC12ArcMIHJ6ZWYcMmQzxadjJVZ+4K6EpCt82534Yzr217HdaD/BE7HTVJoQA473FQMezwpc8rn6W9NTIaYVct9lgJ76T9xM+jQMwIiERsQ3I6cmRlFwAdmdnDC6OqtAgIWgoDrCdg5EFoO67Pke4janoSNus9uwSxv574zZlhVrbsJKiIge2LmGzPrSkrz2e3AzMf7rBTIYdM8bjBpCAHDIh/zksMPBSQNYnWEFrXpv3ciCBjA9oIEDeBsyTJCtyBzXggCymkAwJIfJ81gewXn2jyP8kylPiBX8i09Li/p7xjT73TJ864WfDcXE9SuUvjuFNeyTNj1c2wao7mnS9j/UQRkv13cMAS4TU4l3QMcAG4qUG0bEERWTEuBR4aYGDkB/9CvlFKC5KJaz5YNYYLc7EjSw8BnBXZ8LXlBPgK6APxZsnZT5IQ7/nRN431ANvsPuvCX13GdVkEGvORrBi0mL8YVacC9fr7eLAtyVRCQmYPbfHZ1mH6dXcCZNZiMlREySIFDku4HnndCZ0JAlWForwJ1Vs4EnSzpgDMNGJVVp8BzwAHX4HbTCbARpHRLtN5AS12jPgG+8EirV1IDRtV6Uo+S9jTeB3B1kaQ3oAnTMEXHgBdKzv7MLJ7w8XScYBsYdxv4ciMQAHAEeHRA6K/T32ZiXLtoPmwh3XxG9nKfXTSzr3Kh7kQEuElJzOycpBeBw8CNQ7oeBd73SG4mrzuoJOTK7Wp4yWdrF3jHzN6dxrldqFrHuG6h/+LXfHn6DzM7VZbcWhJQIIDWOq85suS8hgx9JEGzlIlVLXAz6/msTeryFpNsPENMVbxlJRAIBAKBQCAQCAQCgUAgEAgEAoFAYKPhPyWcD0HPEAc3AAAAAElFTkSuQmCC" alt="" /></button>
-          <button id="modeRaises" class="mode-btn" type="button" aria-label="Lateral Raises" title="Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
-          <button id="modeSideRaises" class="mode-btn" type="button" aria-label="Side Lateral Raises" title="Side Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
+        <button id="toggleExercises" class="toggle-exercises-btn" type="button" aria-expanded="true" aria-controls="modeSwitch">Exercises ▾</button>
+
+        <div class="mode-switch" id="modeSwitch">
+          <button id="modeCurls" class="mode-btn active" type="button" aria-label="Arm Curls" title="Arm Curls"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeSquats" class="mode-btn" type="button" aria-label="Squats" title="Squats"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAADsUlEQVR42u2aS2hUVxzGfzPOTHR0YtU2ttpWZUSxBq0ai81CF22x0BYaN5bWnRsX4hMqgggu2kWhbopL6ZOuGrQRbYWGFumiEgpFBVFRDKb1ERMTXzgvvy4STHLnTtObOWfmXjy/xQxzDvfc7ztzzv/877kHHA6Hw+FwOBwOh8PheDqJ2WlWEGcqaYrcpWDtNnYMCCaxio2sYSZ5LtLBMQZsmjAsX1O0Rzc1Ql4dWiJUb2n/U35C+5STl9+1IAIGhNAb6pMfh5QIvQWhpL6TPze03IaBuOH25vB6hZrZtGJhHpg2MJtnK9YtMK7egoHYf0RLK3HUtIFb9Fes646Cgb/pqlBzmz9Cv5gJoXc06BuFDisV+jA6HEg/UaFMfpcWRWctzuiA+keJL+qkltmSbyeZS9DKh6xmBjku0cER+myNf4OtCiBDliYecJle0mQoMUAu9JN3SL6SalOn+vRI93VBX2uTFioVnZGf0C7dHTNxi+rRj9qhFmUUs2XDyH8rgHf5lmd8q/s5xyl6xtxLw7+GvgUMcJpuVJfBJpTRz6qOks5oXV0GnBB6W/erNCBJnWoMasBMKpHkI6YaaKeZF4NeYsbActYbaSdHvuYGBLCR54wY6AiesSYM3DZLW4Wads6TZS5NNIzbykOO8zmFGhsQwPtkfSsvsJdLxJnCNFLjNvWIfko1D6JCTeryjShFbQv9KiyENinva+BXzQq5fBCapp985d/Te9Ho//W652vgKzWEXP5w/vmNr/xrWhH6/gehljGbuCPst5d9mpSPPvOV/6fm1k5+NetAlg2+5Tm2ENeQS4gh4DHddNYtXS5HCO0OlGk+1lm9FZqZIZTWL4HT5TOab9rAxJO56bwU+Jpm3jS9Qz1xA8XgiRcx5hlVX5WBO/w1gat6w2OgyJfcDnhND7+FZo9IKK7N+ifAFC7oY/MLXBXdIYjzKm28QsOTbZIRVvG8p6SdzQyGpP9HTCimhJJKKqmUUsOfk7Ra3Z7+P6+loVkFxjWV0Q9l6fUH0ZGPtpY95BxUMjryV+qqR/4pvRAJ+SDUqHaP/Ot12jKckHy0zTN88toZgaeDJ/JbyqLP98pEQj4ITddRj/yzWhyl4bPd835yUBuiJH+FZ/iU9GkEjtiMMnDQM3wu1uKQk7mjBpNp9pS8zBobB2xsGSjxwFPSQKtl9UYNFDhB0VN2y74BYwg16gs9HDUHTmuR/Tlg9k19mrW8RhqA6xzjSmievxwOh8PhcDgcDofDYZx/AYmOXmOsm0+KAAAAAElFTkSuQmCC" alt="" /></button>
+          <button id="modeLunges" class="mode-btn" type="button" aria-label="Forward Lunges" title="Forward Lunges"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAADsElEQVR42u2az2tUVxTHP/PLmJ+FgMU2RqxCsAvBhS2tFK1gIC2tuBDcdaW4F0FctH+ACxeCgqWLEih0IbSLWl0IrV2oWEoQIWmsYBLDOCaEEJOMiZmZr4tMZN6b99K8mXsn8+B+YGDeu+/eOd937j3n3PcGHA6Hw+FwOBwOh8OxOSRsDSxIkCbJCiVrP2JLgGArn/AFe2khxx1ukrN4r0wbL7RTP+il1ijogQaU0GabtmEBPbolP1l9JWIgQSilSwrioXbFQ8A+ZRXMORs+SJo1HzjIeyHNR2gxf8uMCgBgd2hLL51xENDgaGlewNPQlmfMN7mABMBdciHNf7BsXoBhhNK6HOMwCkK9ul1lfk7HYpHIyqXEBxrUwlvji/pbXyppx3wLMUMAbXzKAH208Jy/uMVzW+HJVjUKGTrIsMArFKtyWgA9nKSf9ynyH9f5ncWYlNLlFfCR7qn0dgUs6Zq6Y7F8ywJ6dd8XgUq6qHQsJAih8wE5YEoHbAkwXUq0cjTg7DYOYSkLmBbQzvbA8zutWG9BQJJU4PlUxHE2TUDDcQJ8NDxjNWpHZi0NmPdA7LeUMfdAw2mUgFLcBcRmCoUtYWseSNsa2EcP+5jVHK8omt2hGQ16gu3coS+gqcBLZpkmywTjTJBlilkWWalXjnkPBM/2NN10s6d8VCTPHFPkuM+gxpvm7Y3QuxpWNP6s74GX+SgU1ZrDnKknSJkWkCYTuc/ndNX+g+a3lG2R+7zD1uYR0Elr5D6ZekKJ6SjUWXU3/+U2a1Xq2gcO82GFgOjTzqIAvzG/csEbJgXwvSkBpqdQl++WiOHAKF+s+F7LwrcowGvtAk8Cr1vxCNjSTAK8TDMZeF2hCQUIoMN3coyZ/xWQahIBQLUHHpMPvK5yDaTqeQFuPg94GQm5rtIDyeYRkPRNoSVGqmNQwi8gVU8mjpAHBAn28zXbqiwSa0nqY0/LDGMhg3k90AgBAviMH9f5L0Q1k7zYgIBEDeVHhfqNk+J0JPPhMQshLUXP0W5aa32LHEXAFnZEHH0kdDP/2nN0lit012R/xEUcbeeX55/QLgXPUSvfcLy2bY3N50I3uLuOOC+piuLOmoBSSFLyIoSY52fOh64AGCLrG3u0NgFRyullfqOfDLDIVUZJsur1VZNXvxcoAmKChyyuM+ce8R3f0lMOvktc55fank1E6CNo5xQnKPITgyzX8yhEkGQPe8tV0DRDzFsXUE5l7Yi83f8/OBwOh8PhcDgcDocjDrwBIarUwu5xFjoAAAAASUVORK5CYII=" alt="" /></button>
+          <button id="modeRaises" class="mode-btn" type="button" aria-label="Lateral Raises" title="Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeSideRaises" class="mode-btn" type="button" aria-label="Side Lateral Raises" title="Side Lateral Raises"><img src="data:image/png;base64,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" alt="" /></button>
           <button id="modeCrunches" class="mode-btn" type="button" aria-label="Standing Crunches" title="Standing Crunches"><img src="data:image/png;base64,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" alt="" /></button>
           <button id="modeJacks" class="mode-btn" type="button" aria-label="Jumping Jacks" title="Jumping Jacks"><img src="data:image/png;base64,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" alt="" /></button>
+
+          <button id="modeJumpSquats" class="mode-btn" type="button" aria-label="Jump Squats" title="Jump Squats"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modePushups" class="mode-btn" type="button" aria-label="Push-ups" title="Push-ups"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAExklEQVR42u2YTUyURxzGf++isoDSFUEDqLQF3SJYRBOpUkx6MKb10MSkB5v2RGNTeumhNqmHVuOhMfHWmtY0UXvw4MGmqbE1HtoTUNqgwLKmVAnI1wrIVyOCCPv0wLLdZXdhX9ZVms7vNDvzzn+eZ/jPF2AwGAwGg8FgMBgMBoPBYDAYDAaD4f+G9awFxEYAWZThJo17NHObx8tYbqR8pept1WlckjSjPp2VW7O2lj9CaTqphwqnSa/8JywIoRpNKpIGbQ438EyTSuBgA7vYTS6PaeNXvMxYCAr5ia1RO53g+DJYukIObdBBfSVvyEz36bhcQugDxeKmcp5hEgmlKEs79I6+kUcTEfJm9KXShM7FNDCq3aEGVjwd2UAqORRRxk5KKWAtjqifOniPOi6xLmYwJ67Qn0k1IHCwmo1so5wduMklfdFOTt7lCg9jtk8zkXQDAot1bGU7O3mZF8myNc52svHGbO2nKxmaQ8QLFehz3dDf8msx7qs+YrscUokqNBSjx3mtSOIiFkKValxU+Cy/6TM1R9T65FaKvo7ao097k3iUCaEStcQp/4qOqDVKfb1cQpt0PaJlTO/LSop8IYey9ao+1h9xiZ/RRdWoI2rbMc0l4rcaC9b61arDkemT4JEmgHQK2EUVuylkTVzdHnOeNj5hQ5S2Bt6i25qN7aSCAxSTSj/1XKMbzRe8RAMCSGE9pVRSSSnrY+zr0ZjiDPc5Gr6fB/ByhLp/ZQksUnAwjT+6WNvbqMBiNYVUUMUuCkiz7f4ywxwjI6J+kKucxhsq1AIxvVCwuA0IYCW5lFHFHorJWuJfb4w6js6T/4gGrnKdW0zZTYo4DAgsMtnCHvZRziZWLUn4HPdwkh9Wc5tzWLhoY8r+nCxgIDDneZRTxV7cuBJc8pMM0Mkv+PCTEqz9me95kzfwcDr8kpCAAYHFGtzsYw872chKWzEn6Oc2PoopIh0xwl1u4cHLHQYYx80gecGvaznE60AmGQwnaEBgUcRBNuGkjG2stRHJzwideGmimXYGmGQtz5PNNL34eIDfmhujh7YQAzlMAbCaTPvywwwIoJKzbLMVYZIB2mmmEQ9djM0JBYZjzOg4jbwW/LWOQQDSyUrQAJDOp3HKn2aELrw04+EO/UxEHjHRsRA0MB0cOYebADjJTtxADiULfi0e0MtftNBEG72MxTpeFqGVQXID5WxGgdljMWEDkzyI+tUkA3TgoRkvnQzZ363n0c2fQQNZTPCIVKCcQg0wHpKE9hBy6ELI5WkqUKrTfr2gjCd1DxRCp0Ju/x9qWJI0pV7V6ox22Lkwh99g/DQGy3e4ECi56KHDGrfizPLFsAB+D14Q0rEYAmbPnL3UcIac+KM55gVuYTzYciOQUMVU86QfER76AyUn+ZziCy7jC9RsiXpLjcH8g6wdH0UAbCafS1QDLPDEXio9tAUvFB/RQzstXKWCDCxa6VhiVKFV+iGYnXd1QCf1nU4o78nO/7xVMMc1uYSsBNaaEDqk+4GATcpLMOBCI1XJF/EWfsn+SGEpZCH4kVH2k89DLtIHyXmCArVUc5jngovLQSPd9sNE2Vg0V69k/hM18KYL3QVnlnwCGAwGg8FgMBgMBoPBYDAYDAaDwfBU+Qenqa9TZCMcMQAAAABJRU5ErkJggg==" alt="" /></button>
+          <button id="modePikePushups" class="mode-btn" type="button" aria-label="Pike Push-ups" title="Pike Push-ups"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAFoElEQVR42u2Za2wUVRTH/7NtF1toCxVQaBFBQJSEmIhaEwmW8EgRQtQoRGMUgWoMICiPELBJa4KKQRSMRvigpJBglAhISiAghIdQCKA8SiFYI+Uh0ApV+u7uzw9d1rY7093t9rGJ99cvM9t77zn/O/eec+aOZDAYDAaDwWAwGAwGg8FgaAVW2w+JZClJ96m3pDKV6C/RDmbaB4RIZQEHuUEVVZRxjFwGITrbtRDdtxjLUbw05SwvEhv1EhBiMpex4yZZuKJaAkKM4DecuE5mVC8kRG920BJFPBm1EhBuPiEYJxkRlRIQ4jUqggqA4zwSdRIQ4gl+D8F9gMM8FGUSEH34KUT3AfYyMIokILqwKgz3AfJJjRIJCDGDyjAFwHf0igIJCJHOH2G7D16+pns0COjLnla4D+BhNd06VQKiC6sd3KvjW04EkVDHB8R3moQgq389yaRzLoiEapbi7hQJCPEUFx0c200aQox1bHGHCuZ2Sp2K6McBB6dOMRz5/p7nehAJ5czo8DoVEc8aB4dKGHMnQCIspnEriIRSpmJ1oASExSyqbZ0pY2rj+I6IYQ63g0i4wsQOywoIMZqrDit6VvPlgHCzlJogEop5ukMkIMRAjtg6UUO2XUxBxLMCTxAJp3m0AyQgEsmzdcDDpyTg1Ks76whGAUPbWQLCxSLqbM3n0QPnfqIPPwaVsIv+7SgBISZRams6n74tmUaIB9gXVMImerWTAIQYxmlbsz8zONjMIcRwfg0qYU07VUiIFLbYmjwT2vZDiFEBb25eSihqtMXryG6H3IyIY5ltJLnI6FDXLUI8x41Gva+wklnsbXIUVkZGG+8EhHiZf2zcL+WFcIwhXMygHIC/yWMaXzQR1MBnbSoAIR6n2Mb927wZbh2DiGU6RewkixyHg7AtxLWZAN9x7V4bMzUsaY0hhMVQZlPgmNw2EoNFTzJ4nZmMp08EtRKiq23h5mGlU+IKMp6bMWyjqoVI9B53MZOjvpOmak4ym8RWSUC4eNe2klnvnLhafJpDWGNbn9b791gp41jVzGYdX5EctgSEmGibura3nLgcx+vHQdunWcgK9vvuviGXeps22WHutxZSVwFDWhMnENMDvh14OMX7zGUntQCcYIrDe9wlhocroCdbbQYq4rHWhTnE4mbL5gRvM4V832r3cogRzHfcGwvDsItw83HAfMElxrU2SiNeahR5rjGHe3HxLLspoog9LCIVFxsdBWwIXESxTqYkvaK3Aj4C3tQC7Yzg2+BZ3VKK7/qy8lSrz3WP9qlclg7rkCS3khx7d5VL3tBmSoykJGAGKphNTOtTDOJujvtHK2EgCb6tWwfk0JAjnN8c1gY+e5fD7N+v5Upr9o96rdBX8kT0yfSmTvmvk9VblTonqWElpPjMH3HUfzjwR5dt00TlKj2g+1otV22EX3y9Oua/TlCqpEL/fQ+fNzt03rZvoXaFsHgRMSy2eevaGH7ish19ZKOicB4i05+ytuH2nSZl2Zz4VTDNLni4mhuQlKH5AZvbqy6apLQ2qBIv6JL/eoCkYpX57lKU7Ltap1yVN+lVrhxtCG3+LccjKy8HGRyZAEQcm/wjbiaWZAp8d1Xs50Mm0A0RxwS28ifVVHONbTwTYtmIcJOPM9mRPQOEWNIoDi0kgyy2N1qyNeRg0XAY8zBjGMswEpytBuaBWl1owYNeET0AWUL6RbVyS5LS9JEqVaIfVKPJviZujVK8Ki2pSoWNtnjIAqR1ytQg29bVOhCZAEnSWV1Vf/9dgh7Uq3pHx9RDSUpSojarKpwpaQaSlK43NFQuWbJ8bSxJNfpeX6oqskCKFKtlmtdk6oqVqfOSLLkUo3p5Q7dh0xJJilW8z/3/2nhUEc7QLUhI0ngNUK088sorj87oUFuMbDAYDAaDwWAwGAwGg8Fg+P/wLzprfTPFtc/jAAAAAElFTkSuQmCC" alt="" /></button>
+          <button id="modeReverseLunges" class="mode-btn" type="button" aria-label="Reverse Lunges" title="Reverse Lunges"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAHhUlEQVR42u2ae3BUVx3HPxt2NyGBJC2BJDySaSs6FJgAlVIRDY5FG0acig7wB2O1Heuj0zIt0z+wasswznSmOlPrOC19WFoFrQ2VGWiLbbWAFo3QoA7YCi0PNTwE0jyWZN9f/8j17N29G/bua2Kn97v/nD33nN853/M7v8c594IHDx48ePDgwYMHDx4+qPDl11xQwXhEmGSeXceegMDPJ1nDLBL8hZ/T/f9CwuX0FdB6vaf/4V9aJTTW08pj+miF+mXHCbW9nwhU6gVl4sGx10GF65YNzHXULaBqjOefB4Fx+B11wTz6jzmBXk456v7B8PuHQIhfkUir6aNzzE3APYTq9LQSxoCH9B0Fxn7+riORAOq5ldXMQBzlKToJFxfIBEFm0kqcdzhFouxhUahC03S9Zqm6WAcqhK7RkzqrqCI6oY26sqxOWQhN1f3aqy5t0woFiyYwQ3tsMSWpx1VTXgKN2mmGG9R9xVAQQt/PCIvD+lLZdCBUpUfShhvUysKHE2rQIUdkf0YVZSEghL6u4Yzhdml8EQRm6rSDwG/zl+giDgigne850oZ5TCtiVSKEHXWDxPMVk5OAAFp5kKmORxOoL4LAOQ456v5ArAiJoxFQtZ4ySj6oblMe0PVFbCG0TOfTNtABtZTcAoR8WqeINcS7uln7SkHAiilrdcKSldB+LSrEKfgv91AAy/g2QQAG2MRSPlGapfGhJFs5wHKuJUw3uzmT9xE9FwFgMvczBYAEDxPka6WZvkGCJEOc5k3OFTL9HBC6QQOWkvfoOr2dtmeL3UJomZF4Wt+UvxwWMEs9ZoiVejSNQH+RRjxHh23S+vSFksdhoXHaqJg1xBHdpN2l0YBQg3Y5wtjEcuhggh5R3AzRoVd0qVgCQkE9pGQGgYuaX4ZEQqhOT5jBntNS4/wK3EJC6CsKORKJiDrKQwBN0s9M0ntB6/QNxQvVgBBarFNm0keNfqP6XPlSuUY9b1bqsJbqdKEaEJqh3xtZW3WHCZNRLc9fnotkzgdwjnXstCqGgXGFLgbVfJcl1t8/8Sy3WWFyZKXKBaFKtWmbzuktrdKGwmxACN2usLXip7Rc29Js4KYSpxJpuI57+CmbibGI9UBhgbOaNVQCEOYB5rAqg2EZCTRyMzfyT6ppNb3yp1Bh23zCnyahoC3k/mLrPEPUMZdrzPT9VI/WWKhOK9XsmFOIHdahpYpN/J1fpHVKUC4I1aZF4RHcO9qiCc1Wj7arKb2F0AT9yDjOQ+qw3UwMqb1sViyEvqhoBoGX0s+wQhWqVJWqVKkardclPacpypRUp83mhu9ltetbVkpXEAGXNuBDkHDs+flczZG0mg7usbal8JNkFb3cpZjPLqmfDVTxZQA+QwtPczdbmIJI5r+0+VyPNznoNvHxDNcRY8j8wghIZNllvdzL89b41/IAfl6n7HEAbZQTv7Rn8UI++RVQQH6N1wYN6VlNUnZpzfq1kXKLHpUU0pLy2sDmLASO6yplbz9HPdqmhuzLKlSvNu1QUlKXFqlLUlSP6avq0AK1ql5B+UpIRyigHVkIxLQ62xSFJuqzmjzq9NGd6tQirdXt+qgeMn5Jiug9ndRBvaif6MaSndKEJugNM0jU9p7gifxXSsiv7ZIO64fapD0O75Y6IawukWEINeotI3i3rXxEzQUQCOolucE+1V5eunsvVEudKe9kuylfneXtZW5E+bOrdi1ccfkG7gk0UWuVLvFXOjlv/atiRr6z9wFsYb+rxjnU6yqQCWAhNdbff3OcPt5msvW/sLNBhPWspZ0a4sSJEyNGlCgxojSz0GqVyBXc3GajQduNXBdn8RMqaNqpBbmNxTzGFkSSIS6SIE6SBCLKWp6xon4iV4LnlsB05lulJK+RJEmkcAJAgAV08CnOMISfJ/lBKjcXtkv2ZAk0IID55l1AD12AirwIv5IPA1VcBUQ4mvE0iYwGchBwa8RLDNWDnISiNdBieznyLgcyzkapScdLQ6CeG0z5d0QB2QgUEmlm25zyXs5mPI0ZmTkJuLOBmXzEKl3gDauUekGU9WApgEbW0EofF+illz76CTFMmAjzTK8ov0EZIlIZbPFeSAAfM+HkbxxzEBgNQTaZ6/gkMSIMcYkQffQbl2BtoAwkSquBgM2F7jXuM7cNNPJpU66gkkoTCu3YxxlHXdI9ATc20GzWK8Re8I1of9guI6sZ1JjQNzpivJKlc9L2vAQE2kyycMx2gExp4FbuY2aBWeMxurIYUWrdr6CNiZeT7WYLtZrLv/1cMLUpDSxkIYtZ7YjNYYtkN5uZTivTaaKBWirNjEP8mJ4sI6YIzONlXufOrK1cEzhCP3XAILvSavts74kbDckUBrhIC/BHHmfECibSQBPTaKGFqQzQyYtZndggw9adk496Ps9WW/abL4SCukNvqlt3pT7vEAroFr2gV/WaXtV2rchUs5BPd+s/Oqr2rM8CGjfqeW28Hla/IooppqgOa+7oW8jF5aCggjp89Nm/1BX4zIeAcRIOXz7yOdOHCHMy3y98BdXMZhJBfIR5h+NO6R48ePDgwYMHDx48ePDgwcMHHf8FoyBZ3EJ3IhMAAAAASUVORK5CYII=" alt="" /></button>
+          <button id="modeWalkingLunges" class="mode-btn" type="button" aria-label="Walking Lunges" title="Walking Lunges"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeHighKnees" class="mode-btn" type="button" aria-label="High Knees" title="High Knees"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAG30lEQVR42u2aXWwc1RXHf5PdrHFsiGsc4xicmKYkDgWilCIgUi0QFhFNlAraUEAg1EgUJKDkCYGalyIQFX2pKgpCRQIREB+GILWlRdRNVdKmSZXGiZ0PSHAdiHGIE9f2+nPj3f33YceTmfHY4MndL7H/POTce8cz57f3zL1nzgyUVFJJJZX0dZZl8mQCWMhKlgDHOMyw4QtkV0IxbdTfNaSUUhpUm9Yrqny7NSf3H9ew3BrQg4oUBYIQut3nviT1a60oAgShb+hDBekPWlAcAN8L+P0l6ZRWZRNgnrEzXUplYP9CGrLov0GAmc5kZXclNQfwGWOB/XF6iwOgk0OB/e0cySaAIQmhTZqYdgsP64dFsYyCULmeUcLj/pi2aH5RuG8jLNAD6tQZSdKE9ugelWXbfdPJnEUtq2kEutnLaZTtZM7I+QXzuIxmlhAhTT/72BOciQoiXM4qTrOTeEHkqkKoQj9Ttyf229QsS0HH3q0eSRPaquoCuDuE0DK94rt5Jekz3eJff4QadMgeT2pT3tcnoYjWqV3B2q9GeY9G92vSGf9VXgGEUJW2qF8z61FZU4EkhG5SjzOW1v15BBBCK7VNSc2m99WiNcL+923td7n/rmrz6X5Ut+qgvkyd+ok61CKE6vRn18hLqsnb7y9UrSc1+KXuS526Vwl9qg2q1Auu/r+oPp/ux/Ss0r6MZ29gMP1bP1VSUo9aNe70HtKq/Eb/Sp3wuNmhjbo1YCGV/qaHp/X1aZ1J98Ok0+Wc59hxnuUHtDIeeOQoFb6eCZ7gTyZ34GiIvxlihCrbnc1sJTnjkSMs8LTFc7xoNj8KMwNxhmwrTRfJWdwZYR//c7Xf5SkmzOY/YQBG6betMhbZlmY4chsPccJu7eZRD44RhQmhBH22FXEBBCEMAW/Qz2aW0sEv6TKff4YBSHHSsWvtHz8deGQcEB/wDyqIk8hG+hwGACcooNb+P3gGpjL+sUzFQsgiikiaQ5kzgIXcAIuIkCJ4BkR8ysCikgau4BqaGKeNVg2YgQg3AyeZZD4ANcQYJ3gGksRBVSzlKq5hNZdRQwSA22jmYQYcPDifNRzlvzl5RhO6VkP2vnpAFwmhZo1O23MT+rV+q906rdS0sZQeyTALzdO12qaENucowRBarl7bkUndNyPA7GrTAiFUq1+oT/16WnVhAMJV5lJOzEdpIQKU2cHx1VVNGQB38Ri72cAWvghTRg13DyRcddAR0sAiYnM8R5wEAO/xCR+Gr1CEm4FeWu056ON1BNTP+fonmAAL66j1RysevoQdYgYslOYZTrGWQV5mOzDTRjabPidtL7AtXE2KFAne41iOKkVClmKKOivJuoDCrltJHdP7ztolKbPmCM3XKxrTsEY0qB/P/SY2VZmr4fdcHziY5Dg7+YAdlNPGYrs3zZ28ZWVWnXoWMw+LJEcYyUutTgit10nfr35GR/SS7lBjZqb0Xddz9KianV0gmvcCF5ny4h3aZVemx9Wp5/UjNZx9Syx0syvMvlCTHUK36VV9JzxCuGU0SEtp4TfEqCNNLxOsoIvjnoCocS21AwzaVoz1rOHnvK3JPJZ6hZapR8PaqTf0pnZpUGf0fbnH0SOu8NqhSjuEIlqngxrV05me/AHU6SNfJnSzD+Ap12jrVHAJoSa9o6NqCgNgLoTGp5JnW2kmfUfUuOxeUhnDQvARm6inK8xlzQFMTKXHDoC3WhH1APScNS2AIadQMEeZe8066TzqBwPEuNCxxeemMn9zAGlOe9rypRfldi0JIOF6qi4YADjlaaV890AFCx17zAebfwAL8DnlD6FKV5mxnLVcYGb/NTkD/Z6gSU+tM7bcIVXOk2zlaqxzRzAJMOAJmqRvBo6zx9WazwZe4/Jzv6hJgFEPwLjv65URtvBXTxV7OavP/aLm9gH/Q02fe2W3EOxjI6u5juu5ksXE6OZAYQFU2bWijA4y7B60AAa0ne2UUc+VNPIv9hcMgAC+ZdcZMvpP0CJjASToptvUr2byHmhy2SN05OZLCHMA57Hc1eoJl5rlE6Capa7WYXN7ba4ALuYiV2vvtGS64AEu5XzHPkN7rr4FMgIggBWuc/XxcU68NwUARFjpan3iegVSJACVLHO1OhgtNoBaLnFs0Z4r980BLKHasQc5kLvP+QwA2GnE2e8njvNpjrw3AwDACpd92FefKAKAmCeNaJ/l848CBaii0bET7M/lB61mABZT59in6CKH5XIzAN90lUwu5Alup7YAav5fVUL3+V5tTKpNDbkBMDMDR72Pj0S5gety4r8hgF38zn7rO6WTudoLTL3kq+BGriKKAIsU/2QHqQL4uL6kkkoqqaSSSsqq/g9zf5955Z8spwAAAABJRU5ErkJggg==" alt="" /></button>
+          <button id="modeMountainClimbers" class="mode-btn" type="button" aria-label="Mountain Climbers" title="Mountain Climbers"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeBurpees" class="mode-btn" type="button" aria-label="Burpees" title="Burpees"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAGuElEQVR42u2aa4xU5RnHf2dnZpfZK+suF6sVBaGViFAlURRiMUhAxVsvUoNXCLbpp1Y0lrRf/KCp1UpM440m9RZiosYL6gdvX6S2CdsECqHpxssqrMAu7ILszOzsXP5+2HfOzsw5M2dmXJyzyfl/OvO+877n+T/P+z7v87zPgQABAgQIECBAgAABAtQIq94CCNpYTYKPGLXcesMs5yzeY7DuorqLL/RbpRTTL+Tef7mOSPqLLLnOEK43BeASwoSZ7yY+sIRZwALCpNwGN9RbeiLMACBeon8OAEOk3bvrb4FpnAHAKQCBRQSRRhZAA+cAcBT3FeQDAlGmAyIGgtnczgoyvM8ODQPNnA3AER/4GzcIzdVBSSmtE5qttzWOjJ5Tu9AP1Cspq1+VMIAP9kAnrUCaGLCBa225buU6oItOIMlgqeH1J9BFFIAwFlfktUe4HJhPBzDKkH8JpEgD07iDFsYKesZoZzMR4FhpC9QZQu16R5IU13ptVFo5jOhabVJKkvSIGvTdX3aaCKBVGpIk/UcX6hmNSZJielALtV+S1Kv5PhXfUIjoSaP1h9Wmm/W4/qyrFdVjkqSstojSBOruXAVwATuZBwxyP31EEBnm8TDdwG5u4HDdxSxPQWiLspKkMY0qqaRGzepP6rZy+vcJhGbpE7nhXbX7Xnxjg18q7hD/G62dAvo3FFr0poNAjzq9xK//QZZDjH0ubUmvYf4hADFHy0ipLMB3BKxxcZ0EMlOEAOBmgVNTjUC2qOWk9yB/ESjW9zdTi0DcQeCkd6zjLwLFPueU9yA/EXAqO+s9yE8EumgqajkDz0DCTwRmE3G0eMInBAQw09Hc7Z2v+ISAEbcYbd7y+YeARZd5SjFqE/C8OfQPgYhN4FN2m6dWx67wMYEmc8kLn/M/89RCo9ew03C5azbkMmbQSw/xCm8OmpluE+i326Z97wQEsJTHuYwwI+xgK8crGthCm03gKMICot4EJh1CnfrQTgqz+lMlWa3QEnO9ldaNulIJSdKgFn1PB5lQRAt0lZYQYTGX2R0W6+ylUR6dRtsxDnHM5AZNtHgN+85LSABRLuU2VtNNnJfpKZi1zREglCIwvmGHOEqGk3QBjfayOj0EBNDOSu5iJe0ATOMeWhkwdRWAA5yoaLJuQgAc5QQhk8qEvMnXTMD4mrXcwbKCrRbix7zGb4w+D/E375sFAcwyP74mTtQcZZa3fDUQEFg0M4c13MpilxnO5nkOsJ7p/J+n+LjQjQpCRImZIt4EcpHQV2TIkDhNBAQWC7iFn7KQGSVcwHGO8Cwv0cQIKZdTYBEP8RC7lN8TMsVW6CNXcJp8AgJYx6NuRek8vMlhsOL5lV9N8BCHSPI0d9KTR6HRhHIZvgIy9tjJJCCA5TxhSs9O7GEBzZTKZBexxeyLLB1cwNP8nD67N1ctjtEPZG0LTFYsJAQzuJcXS4ifYDevm5w2WWKKNGmyZMi6nGytdABwggGASbWA8fRruZdLjavLR5rP+IC3+TcLuQ/A/ZsG9rPRTDeTv3OAX+fpH9qNxx9keJIJCEJczO+5nuairgyH2MVOdnGYLBPpq4sFLLtXcCawmZ7cQjM1mnELHDSL50i+9momIIAfsplNRdlphi/5J+/xCQdzfkYTg7z8/n7WkyjYJxZrzf7oM/bL1YXngcpGsyUJCKCVn/E7LiqYIcUeXmAn/aSLNut41Kby95lWvo+ZGJnT+FI6GQYGSRAFrmGbHVxXA6GwlusNjRYUHBL6SLer2y2+FPqJhsp/11DmbXP0L1MtXq3xcsfLpkZ2TdUVGiF0rh7RYFG55y3dpI5SwbHQQg1IympDDQTQlfpSUlxrNP57sXolDWtFVbMJWVqiP2pfgfDH9ZJWqblcZC90vvolSXdXX9USsnSF/qp71Kzc7xXapg1qrJbAUn1WIPzXekrL1OiVlgjNUZ8kaVPtZTmNf4BzZuUzODfxxcy1Z/uCV9jBAdIVZbVj5mONmqrSghCzGCTFFnrZpijtDDhCPgecJ3GfiQT72coqtvJfqzLxIWNcYK1ZXhdPcB4QoQFYwYOVHLPOl+3lU/PUQUMl98M2UuYEuIVNOr+G+m6MMF1AgjFgtq2QKgkMsAuAs3iAP1S1HFKmTLeS7Ww3J2t1BProBOIkgVZbkWXhNJLYzo+YC2TZV5UaR/gHXbQgGvi8Eu05sJcskCABxOmtZDs5/iGwaKMDizTHGKvcBIIQ3TQBYpiRanezoBmR4D6+4FVaSJP09VcqpWjoIp03Jb6PCBAgQIAAAQIECBAgQIAAAeqKbwHOW20qq7yAgAAAAABJRU5ErkJggg==" alt="" /></button>
+          <button id="modeBicycleCrunches" class="mode-btn" type="button" aria-label="Bicycle Crunches" title="Bicycle Crunches"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeLegRaises" class="mode-btn" type="button" aria-label="Leg Raises" title="Leg Raises"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAEEklEQVR42u2aX4hUVRyAvzuzs+PmrtvuotaauZGSKT5ZpFKQy0Ii9SBEVBom1UP2ZCARBeJL9B8KgqKXHrLCeigIMlqoIKyHZNMgDLHy7/pnV9fdVdcZd78eZrTNe0fKncU7db6nO2fO3PP97jn3d889ZyAQCAQCgUAgEAgEAoFAIPB/JLraApUQMsxnBj/Tn2LNyvrive5zxM+c5dXWuaIAIt+zxAtGlUPIXG3Vy8Rwqny0hkWVq6U3ANjOKACzeYxszQ0jcb6Hy4PoiLdXCiClPSBAkUL540zW1VQfiNju+456gT+cVzMBiLjQLx3POVfUSABiZJe7/Dtn7KyJAMR6H7948/7FNltTH4CILb7o6UvkR/3EmyXlAYh4k1s9f4n+aV+ytRb0I5f5Q2zonPJp8ymXBzHnGvfF9Pt9wrqU64vY7GYHY/rHfMRMLeh3uMViTP+ID9aG/hK3G+ew919uEp0KxDof8vcE/YOuSrl+eeRv8lSC/n7vS3naFPEGt8RyfmnatrIW9Bf6lUn85j3p149c7s5E/T12pl+/ztUeSNTf7d3p129wowOJ+jtckmp9Edt805FE/W4XpF+/w4/HvSSOZ6uz0q+/2O9M5ltvTLt+5Ap3V9Df422ToC9io3e42nV2ed2VP9jFOtcmvCSW6HPV5Ohn7fILBxxTz7rT9TYarxU5xTbbneMc251uk/VmxguJ1/hM4oRBdcQNE51xJqxbCxFreZnp4wqLvMOzDEeUF53qmctSFjOXGUwlBxQZYYiT9NPHcY5ynH4GKPIUT1JfofW32MjZKi+di3iXvbGrVXSDpW9zdvqBvY55OQoOedSDCTP9C3zujEm4dcW8HyU2+Ksd4lQ3edKJ0+Otk5J7xPkeSmzyvA+Lz1mogv5Bl1dHP2lxt4O2xLpZbmEh68lNuNVhnufr6mwc1SWU5SquWUfcSfslZUc5RiNTaSBP7h85nec1tlRr3yspgEMM0ZpYez/Xx8p20c0ZCoxRRwPTaKGFNlpppolGGsjHTD/kdYrVyj2x8whNfEpnQt1euujiDeI/KXCWYQYZoJ8+TjDAIGc4h+SYRgttTGcmbbTQzI88yv7q7Tsm9cAQ77KUhlj5Vn5hJsM0xi5CnjzXxoIaYZhBTnCcY+xlB8MUiOjhwCRvm4pTfCWWv7c5S2y2+4ozT8FBe+3xgUmfuomNbnTfxUfVCd92dvkxttK+CabQ722uXgAV+lLIMI9OFpBnL9/wE+fK04gs69gcy0X/hm5WlSYlkxhAZYQMi1hGUzlx5smRJUNEjnrqyJIlT5YMGSIy5MiQpRT9GKMc5lW2V+8uqNJ5LJ0rA0REZIiIiICI7MVjGENGKNTgfx8CgUAgEAgEAoFAIBAIBAKBwH+LPwFK1FCiw32ERwAAAABJRU5ErkJggg==" alt="" /></button>
+          <button id="modeShoulderTaps" class="mode-btn" type="button" aria-label="Shoulder Taps" title="Shoulder Taps"><img src="data:image/png;base64,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" alt="" /></button>
+          <button id="modeCalfRaises" class="mode-btn" type="button" aria-label="Calf Raises" title="Calf Raises"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAFPUlEQVR42u2bTWxUVRTHf3faaYcSrIJYiAKRWlKJQMSFIX4FjWGDG1GD0bhzRzTGpRoX6saoG6MkCkbBACZqQI3KQo3GiIgmSOQ7tAikHRiwH9My005n/i76eH3TN7Wlve/Ne2b+qzvndW7v771z7z3nnjdQU0011VRTTTGWsdmZwNDEXBL00o+sdh40gACa2chj3EyCNHvZyhnLdyhICV2vbRrRmH7RCo2CRV9C9XpD4/W1rosPwEp1+wCGtTHoZ5Cw1tPttPhsSe4NdPRWAeZXnK/zqYsLQG9Fax/FuAAc5JLPVmJfsMO3JqFGfeCbxPu0MD6rEFqivWXDP6p7YrMPOAg36RUdVEY96tRWrQpj+HZDiRQrWUOKQ/xFmkJswgjn/i/SNvVqRIP6VQ/JxMZ5HIA52unx/7Q2xM3/N2qobAqfCmcO2AJIaY9vEX1P9fEBWKq/fQBntCx4AFs78QLm+mw3cieBO5EtgNkkK/S9MuDRWwQoVbzVt9IYF4Asw257yIVpreBYEQXoZdADMOK0FrI4PgA9brueIad1DbfEBWDQkw0kXXcytAe9DtkCyNPltusRJae9vMLqFEmAIufdtqFI3mmvoC3YZxBMTjzLdaI2dvE4qeAQrAAYgMtlAGOp/Aq28DZtEQ/shJ4pi4MuKTsuvXxKs4JAqLfI4FUz/WRIMcf53M5m1vG9Gkmxj98oRipbE0LP+6LRA1qv7cr47F16MGIOJVRX4VDlSyXVoDv0uo6XnVpLX9lzJ1sutJj7fLbTFIA/OMQRnmUpCcAgoIUnGZIBCvzEuapXEYQ2qOB7As9p1LmW64xKyqlHPcoqp6Gy5/HuzNJ/C09AAKsq9PSPc8MH6KARgwFGHOdvpoE8WYp0zGw62HKhlgq2K32f5VHmle04Sd7hLr7hRQqcnZkD2QIoVLAlAQyIDJkxs6CRAaCHIzP3fluhREcF22TZmJWZawHAAOyn33ch4DjUGgAAf1aoBOQn+Y6VrcAWwAA/+2yXp9FPdQAMQN84Y3GColMUAQDcPPiKhiuUnCINMN5hBicFiMoq5Cjv5sGj6gvHhezlA510MA+DIYFIcsw3KyIOcJ4iTQxTZIQiYhfZeAEUKNHo7r5ZOsIJkm2uQjnPpy5OhzB6qwAjZTvvcS5O+o1I7cTQXHYSfdJzWh2orAAI4G5aPaYT4Qzf3hNo4GFP9Jlmf1h5ri2AxazxfNrN4VBGbxGg3ZNU5vjcLXH8l6w8omnvAwK4AeOcSi+hwb2U5sSURlfNVUgAy9nFTpYBMNtz8RQXptRJ9YI5ASxjC2tZy1ZuA0+FDE6WbWmTdFMVAACeppVuztHGJuCCJxY9amNgU9X0Y6EP2c1LlHiVLNBNznGjPMfCPCqcFoABdJgkJcQBCkCGrAPQx7nQRs9Ml9GxG93nRv8XpxAFRQZgTDkXIM1AHAGG3XWoa9LzoEgClNzoszvc4stMMrISZ8GpR85xQ4nMtPsLHaDIC+Cs/+tod6z5cOst0wYwABlnO13Ny6ScC4tAISLYmQNP0Oa2VzMrtNFbA/CewbUyP1YABuB9PnJrNNcy72q+WnUAADJs4jVnIa33ZAYhyEqFxsAAb/ItAHW0MTu8Sry9Y5UBPqYANLGZHRO9KydkSJDAAIY6EpF5SVxogX53f361XpX/xugRfaLPlJbUqU+1Qw9E5L0JIXS/dmiPvtBbapkAoEnfjavnb1OiypX6URkEP/AjBihRmmCJybGFftdxDUNsH1dXuOr/G6o06vnGYyiG86vXmmqqqaaa/p/6F4rt64OwmrSYAAAAAElFTkSuQmCC" alt="" /></button>
+          <button id="modeGluteBridges" class="mode-btn" type="button" aria-label="Glute Bridges" title="Glute Bridges"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAQAAABIkb+zAAAD80lEQVR42u2YXWiWZRjHf8829+mMTE1QAxPElmnZBwohlEqB5EEJhVgnIkFFVKSFdRDBDkpQqKO+DoLIg8LCUNICk7SILENNU2ZoTcerti+3vZtz76+DvT5t7v2ca7O4f0fPc39d/+t+rut+rueBQCAQCAQCgUAgEAgEAoFAIBAIBAKBwOgSja15ASqoYxk3k2AH++kbY0nFiLfE6T7hZ561n4RrLXGshRUkHStd6EaPesmBNLnwGndAxOt92K02m4l6KcaFstEVT8R0VrCKO6nIMqiOcfSOpqqCxVvmXF/3qH3m4lenXmNBlI74e33H0+an7ZrKAhFrXe4ntuQQ3etuf4rv1hSTBf9aDggRk1jIYu7hLqpzDP2dzZzmrfh+AR+Myu7mEm+Js1zvfrvzBMwF37dOfMTeuO0ba8YwiMQS51hvg6k84vvc5worRLzFM3H7H84aIwfEUm/1TU8VkKyNbnBKf7SL1X4Z93T74Bg4IJY6z03+WYD4pFtc8E/RIOK6Af3rinuZjZT4zQUdk3rY1VYPliguiCsi/djSEXJAxHFOdpq1RmYeUeptBYvXbc4aur9ipV/EYw54w4g4IFa43C0etsFvfcUZQ/YtcrYbbSxQvDZ5d6bwEPHJOO3Pe/sIOCDWWO+FAea/847L5kWc4kueKFi89rohW7kszo6Tv89VV50FIj7nxSsk7OmvVMRSl7k3T10zmE7fcLzZ7ZX5UTx240g4MNPjQ0SkfCZd2zzv+QJEp+y026QJd7rSSnPZw0fj19kuq67egceu+Njo53PHWe5rJgsQf8QNLnap91tnTb49Fad5JD33pDOv3oGXM8r6wfE+bqeastm2ASXAQPo86IvelPnkymox8u30/KQPFDYzVzHXk7G1i4k8TTXQzrs0Uk4tk5jCjUxmIhOoJMUvfMhWmrDID3TZzhqqgEqW8JWp/PNzOXCIrgxV5AGmUQfABJ6lgxbOkSDBMdropoQqmtlOU/E/PCKEA5xgLgBraec9E/nWydorXMenLL2i+RwPUcOOjB+EfSRpp5mznKOVdlpppZU2LtBBB11008NFesm6r0ItO1mUvk3xI5v4mpain2T/YuJiTw6K7KTrxTkFv3U15UU7bfGMJzzk9+7yVWtzHKUzbBg0v8uffWGY5bUYeZ977Emn5XGfslIsi1NtOCSz15rifP8aMqPH1dlPsBw5EKHs5iCLmEc5DezjFKkIL1FPFSuZMKz/em205ehNcCwOocuUMzWXymE9G6qYz0zKiCghIkqvFKWvB6892MZv7OVSlG1dqGNJnGEREtHCNs7+Z344BgKBQCAQCAQCgUAgEAgEAoFAIBAI/O/5G99XpLupT6cWAAAAAElFTkSuQmCC" alt="" /></button>
         </div>
       </div>
 
@@ -801,6 +1138,8 @@
 
       <!-- Bottom stats and exercise information -->
       <div class="bottom-controls">
+        <button id="toggleStats" class="info-toggle-btn" type="button" aria-label="Toggle exercise info" title="Toggle exercise info" aria-expanded="true" aria-controls="statsWrap">Info &#9662;</button>
+        <div class="stats-wrap" id="statsWrap">
         <div class="status" id="curlStats">
           <div>
             <strong>Left Reps</strong>
@@ -916,6 +1255,83 @@
             <div id="jackFeet">In</div>
           </div>
         </div>
+
+        <div class="status" id="jumpSquatStats" style="display: none;">
+          <div><strong>Reps</strong><div id="jumpSquatReps">0</div></div>
+          <div><strong>Stage</strong><div id="jumpSquatStage">None</div></div>
+          <div><strong>Angle</strong><div id="jumpSquatAngle">0°</div></div>
+        </div>
+
+        <div class="status" id="pushupStats" style="display: none;">
+          <div><strong>Reps</strong><div id="pushupReps">0</div></div>
+          <div><strong>Stage</strong><div id="pushupStage">None</div></div>
+          <div><strong>Angle</strong><div id="pushupAngle">0°</div></div>
+        </div>
+
+        <div class="status" id="pikePushupStats" style="display: none;">
+          <div><strong>Reps</strong><div id="pikePushupReps">0</div></div>
+          <div><strong>Stage</strong><div id="pikePushupStage">None</div></div>
+          <div><strong>Angle</strong><div id="pikePushupAngle">0°</div></div>
+        </div>
+
+        <div class="status" id="reverseLungeStats" style="display: none;">
+          <div><strong>Reps</strong><div id="reverseLungeReps">0</div></div>
+          <div><strong>Stage</strong><div id="reverseLungeStage">None</div></div>
+          <div><strong>Side</strong><div id="reverseLungeSide">-</div></div>
+        </div>
+
+        <div class="status" id="walkingLungeStats" style="display: none;">
+          <div><strong>Reps</strong><div id="walkingLungeReps">0</div></div>
+          <div><strong>Stage</strong><div id="walkingLungeStage">None</div></div>
+          <div><strong>Side</strong><div id="walkingLungeSide">-</div></div>
+        </div>
+
+        <div class="status" id="highKneeStats" style="display: none;">
+          <div><strong>Reps</strong><div id="highKneeReps">0</div></div>
+          <div><strong>Stage</strong><div id="highKneeStage">None</div></div>
+          <div><strong>Side</strong><div id="highKneeSide">-</div></div>
+        </div>
+
+        <div class="status" id="climberStats" style="display: none;">
+          <div><strong>Reps</strong><div id="climberReps">0</div></div>
+          <div><strong>Stage</strong><div id="climberStage">None</div></div>
+          <div><strong>Side</strong><div id="climberSide">-</div></div>
+        </div>
+
+        <div class="status" id="burpeeStats" style="display: none;">
+          <div><strong>Reps</strong><div id="burpeeReps">0</div></div>
+          <div><strong>Stage</strong><div id="burpeeStage">None</div></div>
+        </div>
+
+        <div class="status" id="bicycleStats" style="display: none;">
+          <div><strong>Reps</strong><div id="bicycleReps">0</div></div>
+          <div><strong>Stage</strong><div id="bicycleStage">None</div></div>
+          <div><strong>Side</strong><div id="bicycleSide">-</div></div>
+        </div>
+
+        <div class="status" id="legRaiseStats" style="display: none;">
+          <div><strong>Reps</strong><div id="legRaiseReps">0</div></div>
+          <div><strong>Stage</strong><div id="legRaiseStage">None</div></div>
+          <div><strong>Angle</strong><div id="legRaiseAngle">0°</div></div>
+        </div>
+
+        <div class="status" id="shoulderTapStats" style="display: none;">
+          <div><strong>Reps</strong><div id="shoulderTapReps">0</div></div>
+          <div><strong>Stage</strong><div id="shoulderTapStage">None</div></div>
+          <div><strong>Side</strong><div id="shoulderTapSide">-</div></div>
+        </div>
+
+        <div class="status" id="calfRaiseStats" style="display: none;">
+          <div><strong>Reps</strong><div id="calfRaiseReps">0</div></div>
+          <div><strong>Stage</strong><div id="calfRaiseStage">None</div></div>
+        </div>
+
+        <div class="status" id="gluteBridgeStats" style="display: none;">
+          <div><strong>Reps</strong><div id="gluteBridgeReps">0</div></div>
+          <div><strong>Stage</strong><div id="gluteBridgeStage">None</div></div>
+          <div><strong>Angle</strong><div id="gluteBridgeAngle">0°</div></div>
+        </div>
+        </div>
       </div>
     </div>
 
@@ -946,6 +1362,18 @@
         <div class="results-grid" id="resultsGrid"></div>
       </div>
     </div>
+
+    <div id="dayPlanOverlay" class="results-overlay" aria-hidden="true">
+      <div class="results-panel">
+        <div class="results-header">
+          <h2 id="dayPlanTitle">Day 1 – Full Body Strength</h2>
+          <button id="closeDayPlan" class="close-summary-btn" type="button">Close</button>
+        </div>
+        <p class="day-plan-subtitle" id="dayPlanSubtitle" style="display: none;"></p>
+        <ol class="day-plan-list" id="dayPlanList"></ol>
+        <button id="startDayTraining" class="training-action day-plan-start" type="button">Start Training</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -961,6 +1389,71 @@
     const zoomOutButton = document.getElementById('zoomOut');
     const zoomLevelButton = document.getElementById('zoomLevel');
     const fitToggleButton = document.getElementById('fitToggle');
+    const toggleExercisesButton = document.getElementById('toggleExercises');
+    const modeSwitchElement = document.getElementById('modeSwitch');
+    const toggleCameraControlsButton = document.getElementById('toggleCameraControls');
+    const cameraControlsBodyElement = document.getElementById('cameraControlsBody');
+    const toggleDayRailButton = document.getElementById('toggleDayRail');
+    const dayRailBodyElement = document.getElementById('dayRailBody');
+    const toggleStatsButton = document.getElementById('toggleStats');
+    const statsWrapElement = document.getElementById('statsWrap');
+
+    // Button size (--mbtn-size) is now fully CSS-driven (see :root and its
+    // media queries above) so it stays small on wide desktop viewports and
+    // scales up on narrow/portrait ones, always keeping exactly 5 buttons
+    // visible per row with the rest reachable by horizontal scroll/swipe.
+
+    // Mouse/trackpad drag-to-scroll + vertical-wheel-to-horizontal support
+    // so the horizontally scrolling exercise row can be "swiped" with a
+    // mouse on desktop, not just touch on mobile.
+    (() => {
+      const rail = modeSwitchElement;
+      let isDown = false;
+      let didDrag = false;
+      let startX = 0;
+      let startScroll = 0;
+
+      rail.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          rail.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      rail.addEventListener('pointerdown', (e) => {
+        isDown = true;
+        didDrag = false;
+        startX = e.clientX;
+        startScroll = rail.scrollLeft;
+        rail.classList.add('dragging');
+      });
+
+      rail.addEventListener('pointermove', (e) => {
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 4) didDrag = true;
+        rail.scrollLeft = startScroll - dx;
+      });
+
+      const endDrag = () => {
+        isDown = false;
+        rail.classList.remove('dragging');
+      };
+      rail.addEventListener('pointerup', endDrag);
+      rail.addEventListener('pointerleave', endDrag);
+      rail.addEventListener('pointercancel', endDrag);
+
+      // Suppress the click on a mode button if the pointer actually dragged,
+      // so dragging the rail doesn't accidentally switch exercises.
+      rail.addEventListener('click', (e) => {
+        if (didDrag) {
+          e.stopPropagation();
+          e.preventDefault();
+          didDrag = false;
+        }
+      }, true);
+    })();
+
     const curlStats = document.getElementById('curlStats');
     const squatStats = document.getElementById('squatStats');
     const lungeStats = document.getElementById('lungeStats');
@@ -1000,6 +1493,86 @@
     const modeSideRaisesButton = document.getElementById('modeSideRaises');
     const modeCrunchesButton = document.getElementById('modeCrunches');
     const modeJacksButton = document.getElementById('modeJacks');
+    const modeSubtitleElement = document.getElementById('modeSubtitle');
+    const byId = (id) => document.getElementById(id);
+
+    // New exercises: buttons, stats panels, and readout fields, all looked up by id.
+    const modeJumpSquatsButton = byId('modeJumpSquats');
+    const modePushupsButton = byId('modePushups');
+    const modePikePushupsButton = byId('modePikePushups');
+    const modeReverseLungesButton = byId('modeReverseLunges');
+    const modeWalkingLungesButton = byId('modeWalkingLunges');
+    const modeHighKneesButton = byId('modeHighKnees');
+    const modeMountainClimbersButton = byId('modeMountainClimbers');
+    const modeBurpeesButton = byId('modeBurpees');
+    const modeBicycleCrunchesButton = byId('modeBicycleCrunches');
+    const modeLegRaisesButton = byId('modeLegRaises');
+    const modeShoulderTapsButton = byId('modeShoulderTaps');
+    const modeCalfRaisesButton = byId('modeCalfRaises');
+    const modeGluteBridgesButton = byId('modeGluteBridges');
+
+    const jumpSquatStats = byId('jumpSquatStats');
+    const jumpSquatRepsElement = byId('jumpSquatReps');
+    const jumpSquatStageElement = byId('jumpSquatStage');
+    const jumpSquatAngleElement = byId('jumpSquatAngle');
+
+    const pushupStats = byId('pushupStats');
+    const pushupRepsElement = byId('pushupReps');
+    const pushupStageElement = byId('pushupStage');
+    const pushupAngleElement = byId('pushupAngle');
+
+    const pikePushupStats = byId('pikePushupStats');
+    const pikePushupRepsElement = byId('pikePushupReps');
+    const pikePushupStageElement = byId('pikePushupStage');
+    const pikePushupAngleElement = byId('pikePushupAngle');
+
+    const reverseLungeStats = byId('reverseLungeStats');
+    const reverseLungeRepsElement = byId('reverseLungeReps');
+    const reverseLungeStageElement = byId('reverseLungeStage');
+    const reverseLungeSideElement = byId('reverseLungeSide');
+
+    const walkingLungeStats = byId('walkingLungeStats');
+    const walkingLungeRepsElement = byId('walkingLungeReps');
+    const walkingLungeStageElement = byId('walkingLungeStage');
+    const walkingLungeSideElement = byId('walkingLungeSide');
+
+    const highKneeStats = byId('highKneeStats');
+    const highKneeRepsElement = byId('highKneeReps');
+    const highKneeStageElement = byId('highKneeStage');
+    const highKneeSideElement = byId('highKneeSide');
+
+    const climberStats = byId('climberStats');
+    const climberRepsElement = byId('climberReps');
+    const climberStageElement = byId('climberStage');
+    const climberSideElement = byId('climberSide');
+
+    const burpeeStats = byId('burpeeStats');
+    const burpeeRepsElement = byId('burpeeReps');
+    const burpeeStageElement = byId('burpeeStage');
+
+    const bicycleStats = byId('bicycleStats');
+    const bicycleRepsElement = byId('bicycleReps');
+    const bicycleStageElement = byId('bicycleStage');
+    const bicycleSideElement = byId('bicycleSide');
+
+    const legRaiseStats = byId('legRaiseStats');
+    const legRaiseRepsElement = byId('legRaiseReps');
+    const legRaiseStageElement = byId('legRaiseStage');
+    const legRaiseAngleElement = byId('legRaiseAngle');
+
+    const shoulderTapStats = byId('shoulderTapStats');
+    const shoulderTapRepsElement = byId('shoulderTapReps');
+    const shoulderTapStageElement = byId('shoulderTapStage');
+    const shoulderTapSideElement = byId('shoulderTapSide');
+
+    const calfRaiseStats = byId('calfRaiseStats');
+    const calfRaiseRepsElement = byId('calfRaiseReps');
+    const calfRaiseStageElement = byId('calfRaiseStage');
+
+    const gluteBridgeStats = byId('gluteBridgeStats');
+    const gluteBridgeRepsElement = byId('gluteBridgeReps');
+    const gluteBridgeStageElement = byId('gluteBridgeStage');
+    const gluteBridgeAngleElement = byId('gluteBridgeAngle');
     const trainingDock = document.getElementById('trainingDock');
     const startTrainingButton = document.getElementById('startTraining');
     const pauseTrainingButton = document.getElementById('pauseTraining');
@@ -1017,6 +1590,15 @@
     const feedbackTitle = document.getElementById('feedbackTitle');
     const feedbackMessage = document.getElementById('feedbackMessage');
     const closeSummaryButton = document.getElementById('closeSummary');
+    const daySelector = document.getElementById('daySelector');
+    const dayButtons = Array.from(document.querySelectorAll('.day-btn'));
+    const dayPlanOverlay = document.getElementById('dayPlanOverlay');
+    const dayPlanTitleElement = document.getElementById('dayPlanTitle');
+    const dayPlanSubtitleElement = document.getElementById('dayPlanSubtitle');
+    const dayPlanListElement = document.getElementById('dayPlanList');
+    const closeDayPlanButton = document.getElementById('closeDayPlan');
+    const startDayTrainingButton = document.getElementById('startDayTraining');
+    const showAllExercisesButton = document.getElementById('showAllExercises');
 
     let leftCounter = 0;
     let rightCounter = 0;
@@ -1035,6 +1617,42 @@
     let crunchStage = 'UP';
     let jackCounter = 0;
     let jackStage = 'CLOSED';
+
+    // New exercises: counters + stage state.
+    let jumpSquatCounter = 0;
+    let jumpSquatStage = 'UP';
+    let pushupCounter = 0;
+    let pushupStage = 'UP';
+    let pikePushupCounter = 0;
+    let pikePushupStage = 'UP';
+    let reverseLungeCounter = 0;
+    let reverseLungeStage = 'None';
+    let reverseLungeSide = '-';
+    let walkingLungeCounter = 0;
+    let walkingLungeStage = 'None';
+    let walkingLungeSide = '-';
+    let highKneeCounter = 0;
+    let highKneeStage = 'DOWN';
+    let highKneeSide = '-';
+    let climberCounter = 0;
+    let climberStage = 'DOWN';
+    let climberSide = '-';
+    let burpeeCounter = 0;
+    let burpeeStage = 'UP';
+    let burpeeBaselineY = null;
+    let bicycleCounter = 0;
+    let bicycleStage = 'NONE';
+    let legRaiseCounter = 0;
+    let legRaiseStage = 'DOWN';
+    let shoulderTapCounter = 0;
+    let shoulderTapStage = 'NONE';
+    let calfRaiseCounter = 0;
+    let calfRaiseStage = 'DOWN';
+    let gluteBridgeCounter = 0;
+    let gluteBridgeStage = 'DOWN';
+
+    let selectedDayIndex = null;
+
     let currentMode = 'curls';
     let cameraZoom = 1;
     let isFitMode = false;
@@ -1059,7 +1677,130 @@
       { mode: 'sideRaises', name: 'Side Lateral Raises' },
       { mode: 'crunches', name: 'Standing Crunches' },
       { mode: 'jacks', name: 'Jumping Jacks' },
+      { mode: 'jumpSquats', name: 'Jump Squats' },
+      { mode: 'pushups', name: 'Push-ups' },
+      { mode: 'pikePushups', name: 'Pike Push-ups' },
+      { mode: 'reverseLunges', name: 'Reverse Lunges' },
+      { mode: 'highKnees', name: 'High Knees' },
+      { mode: 'mountainClimbers', name: 'Mountain Climbers' },
+      { mode: 'burpees', name: 'Burpees' },
+      { mode: 'bicycleCrunches', name: 'Bicycle Crunches' },
+      { mode: 'legRaises', name: 'Leg Raises' },
+      { mode: 'shoulderTaps', name: 'Shoulder Taps' },
+      { mode: 'calfRaises', name: 'Calf Raises' },
+      { mode: 'walkingLunges', name: 'Walking Lunges' },
+      { mode: 'gluteBridges', name: 'Glute Bridges' },
     ];
+
+    // Camera-positioning tips for exercises where framing really matters.
+    // Shown in the header subtitle whenever the mode is selected.
+    const DEFAULT_MODE_SUBTITLE = 'Choose a mode and perform the exercise to count reps.';
+    const MODE_TIPS = {
+      jumpSquats: 'Stand back far enough for the camera to see your full jump.',
+      pushups: 'Position the camera low and to the side to see your arm bend.',
+      pikePushups: 'Position the camera low and to the side to see your hips and arms.',
+      reverseLunges: 'Face the camera and step backward into each lunge.',
+      highKnees: 'Face the camera and drive your knees up toward hip height.',
+      mountainClimbers: 'Get into a plank with the camera to the side.',
+      burpees: 'Give yourself room to drop and jump, fully in frame.',
+      bicycleCrunches: 'Lie down with the camera to the side or overhead.',
+      legRaises: 'Lie on your back with the camera to the side.',
+      shoulderTaps: 'Get into a plank with the camera to the side.',
+      calfRaises: 'Stand facing the camera with your feet visible.',
+      walkingLunges: 'Stay in frame as you step forward — a wider shot helps.',
+      gluteBridges: 'Best viewed from the side, lying in profile to the camera.',
+    };
+
+    // The 7-day program. Each entry lists the exercises for that day using the
+    // exact wording requested, paired with the mode id that does the counting.
+    const WEEKLY_PROGRAM = [
+      {
+        title: 'Full Body Strength',
+        exercises: [
+          { label: 'Bodyweight Squats', mode: 'squats' },
+          { label: 'Push-ups', mode: 'pushups' },
+          { label: 'Reverse Lunges', mode: 'reverseLunges' },
+          { label: 'Shoulder Taps', mode: 'shoulderTaps' },
+          { label: 'Jumping Jacks', mode: 'jacks' },
+          { label: 'Arm Curls', mode: 'curls' },
+        ],
+      },
+      {
+        title: 'Cardio HIIT',
+        exercises: [
+          { label: 'High Knees', mode: 'highKnees' },
+          { label: 'Jumping Jacks', mode: 'jacks' },
+          { label: 'Mountain Climbers', mode: 'mountainClimbers' },
+          { label: 'Burpees', mode: 'burpees' },
+          { label: 'Squat Jumps', mode: 'jumpSquats' },
+        ],
+      },
+      {
+        title: 'Lower Body',
+        exercises: [
+          { label: 'Squats', mode: 'squats' },
+          { label: 'Reverse Lunges', mode: 'reverseLunges' },
+          { label: 'Jump Squats', mode: 'jumpSquats' },
+          { label: 'Calf Raises', mode: 'calfRaises' },
+          { label: 'High Knees', mode: 'highKnees' },
+          { label: 'Side Lateral Raises', mode: 'sideRaises' },
+        ],
+      },
+      {
+        title: 'Upper Body',
+        exercises: [
+          { label: 'Push-ups', mode: 'pushups' },
+          { label: 'Pike Push-ups', mode: 'pikePushups' },
+          { label: 'Shoulder Taps', mode: 'shoulderTaps' },
+          { label: 'Mountain Climbers', mode: 'mountainClimbers' },
+          { label: 'Jumping Jacks', mode: 'jacks' },
+          { label: 'Standing Crunches', mode: 'crunches' },
+        ],
+      },
+      {
+        title: 'Athletic Conditioning',
+        exercises: [
+          { label: 'Burpees', mode: 'burpees' },
+          { label: 'Jump Squats', mode: 'jumpSquats' },
+          { label: 'High Knees', mode: 'highKnees' },
+          { label: 'Reverse Lunges', mode: 'reverseLunges' },
+          { label: 'Mountain Climbers', mode: 'mountainClimbers' },
+          { label: 'Forward Lunges', mode: 'lunges' },
+        ],
+      },
+      {
+        title: 'Core',
+        exercises: [
+          { label: 'Bicycle Crunches', mode: 'bicycleCrunches' },
+          { label: 'Leg Raises', mode: 'legRaises' },
+          { label: 'Mountain Climbers', mode: 'mountainClimbers' },
+          { label: 'Shoulder Taps', mode: 'shoulderTaps' },
+          { label: 'High Knees', mode: 'highKnees' },
+        ],
+      },
+      {
+        title: 'Weekly Challenge',
+        subtitle: 'Complete for time',
+        exercises: [
+          { label: 'Jumping Jacks', mode: 'jacks' },
+          { label: 'Push-ups', mode: 'pushups' },
+          { label: 'Squats', mode: 'squats' },
+          { label: 'Burpees', mode: 'burpees' },
+          { label: 'Reverse Lunges', mode: 'reverseLunges' },
+          { label: 'Mountain Climbers', mode: 'mountainClimbers' },
+          { label: 'Bicycle Crunches', mode: 'bicycleCrunches' },
+          { label: 'Jump Squats', mode: 'jumpSquats' },
+          { label: 'Lateral Raises', mode: 'raises' },
+          { label: 'Walking Lunges', mode: 'walkingLunges' },
+          { label: 'Glute Bridges', mode: 'gluteBridges' },
+        ],
+      },
+    ];
+
+    // The list the active/next "Start Training" session will cycle through.
+    // Defaults to the full exercise catalog; picking a day from the right-side
+    // rail swaps this to that day's curated list.
+    let activeSessionExercises = trainingExercises;
 
     // MediaPipe Pose landmark indices 0-10 cover the face (nose, eyes, ears, mouth).
     // We keep them out of the visual overlay entirely, while still leaving
@@ -1105,28 +1846,195 @@
       return { stage: squatStage, counter: squatCounter, angle };
     }
 
+    // --- Generic helpers reused by the new exercises below ---
+
+    // Two-state rep counter driven by a single numeric value (an angle, or any
+    // other measurement). The tracker sits in `markerStage` while the value is
+    // on the "marker" side of things; a rep is counted the moment the value
+    // swings to the "complete" side while still in `markerStage`.
+    function updateTwoStateRep(stage, counter, isMarker, markerStage, isComplete, completeStage) {
+      let nextStage = stage;
+      let nextCounter = counter;
+      if (isMarker) {
+        nextStage = markerStage;
+      }
+      if (isComplete && nextStage === markerStage) {
+        nextStage = completeStage;
+        nextCounter += 1;
+      }
+      return { stage: nextStage, counter: nextCounter };
+    }
+
+    // Left/right rep counter (used by lunge- and knee-drive-style exercises).
+    // Counts once when both legs return to rest after either was active.
+    function updateSidedRep(stage, counter, side, leftActive, rightActive, activeLabel, restLabel) {
+      let nextStage = stage;
+      let nextCounter = counter;
+      let nextSide = side;
+      if (leftActive && rightActive) {
+        nextStage = activeLabel;
+        nextSide = 'BOTH';
+      } else if (leftActive) {
+        nextStage = activeLabel;
+        nextSide = 'LEFT';
+      } else if (rightActive) {
+        nextStage = activeLabel;
+        nextSide = 'RIGHT';
+      } else if (nextStage === activeLabel) {
+        nextStage = restLabel;
+        nextCounter += 1;
+      }
+      return { stage: nextStage, counter: nextCounter, side: nextSide };
+    }
+
+    // Alternating-touch counter (used by bicycle crunches and shoulder taps).
+    // `stage` tracks which side last touched ('L', 'R', or 'NONE'); a rep is
+    // counted each time the touching side switches.
+    function updateAlternatingTouch(stage, counter, leftTouch, rightTouch) {
+      let nextStage = stage;
+      let nextCounter = counter;
+      if (leftTouch && nextStage !== 'L') {
+        if (nextStage === 'R') {
+          nextCounter += 1;
+        }
+        nextStage = 'L';
+      } else if (rightTouch && nextStage !== 'R') {
+        if (nextStage === 'L') {
+          nextCounter += 1;
+        }
+        nextStage = 'R';
+      }
+      return { stage: nextStage, counter: nextCounter };
+    }
+
+    function landmarkDistance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    // Burpees: self-calibrates a standing baseline (hip height while the legs
+    // are extended), then requires a big drop toward the floor followed by an
+    // explosive return near/above that baseline to count a rep.
+    function updateBurpee(stage, counter, baselineY, hipY, kneeAngle) {
+      let nextBaseline = baselineY;
+      if (kneeAngle > 165 && (nextBaseline === null || hipY < nextBaseline)) {
+        nextBaseline = hipY;
+      }
+
+      let nextStage = stage;
+      let nextCounter = counter;
+      if (nextBaseline !== null) {
+        const dropped = hipY > nextBaseline + 0.16;
+        const extended = hipY < nextBaseline + 0.05 && kneeAngle > 150;
+        if (dropped && nextStage === 'UP') {
+          nextStage = 'DOWN';
+        }
+        if (extended && nextStage === 'DOWN') {
+          nextStage = 'UP';
+          nextCounter += 1;
+        }
+      }
+
+      return { stage: nextStage, counter: nextCounter, baselineY: nextBaseline };
+    }
+
+    // Shared mode -> element lookups, reused by setMode() and the day-filter below.
+    const STATS_BY_MODE = {
+      curls: curlStats,
+      squats: squatStats,
+      lunges: lungeStats,
+      raises: raiseStats,
+      sideRaises: sideRaiseStats,
+      crunches: crunchStats,
+      jacks: jackStats,
+      jumpSquats: jumpSquatStats,
+      pushups: pushupStats,
+      pikePushups: pikePushupStats,
+      reverseLunges: reverseLungeStats,
+      highKnees: highKneeStats,
+      mountainClimbers: climberStats,
+      burpees: burpeeStats,
+      bicycleCrunches: bicycleStats,
+      legRaises: legRaiseStats,
+      shoulderTaps: shoulderTapStats,
+      calfRaises: calfRaiseStats,
+      walkingLunges: walkingLungeStats,
+      gluteBridges: gluteBridgeStats,
+    };
+
+    const MODE_BUTTONS = {
+      curls: modeCurlsButton,
+      squats: modeSquatsButton,
+      lunges: modeLungesButton,
+      raises: modeRaisesButton,
+      sideRaises: modeSideRaisesButton,
+      crunches: modeCrunchesButton,
+      jacks: modeJacksButton,
+      jumpSquats: modeJumpSquatsButton,
+      pushups: modePushupsButton,
+      pikePushups: modePikePushupsButton,
+      reverseLunges: modeReverseLungesButton,
+      highKnees: modeHighKneesButton,
+      mountainClimbers: modeMountainClimbersButton,
+      burpees: modeBurpeesButton,
+      bicycleCrunches: modeBicycleCrunchesButton,
+      legRaises: modeLegRaisesButton,
+      shoulderTaps: modeShoulderTapsButton,
+      calfRaises: modeCalfRaisesButton,
+      walkingLunges: modeWalkingLungesButton,
+      gluteBridges: modeGluteBridgesButton,
+    };
+
+    // Shows only the given modes' buttons in the top exercise picker (used when
+    // a day is selected). Pass null/undefined to show every exercise again.
+    function applyModeButtonFilter(modes) {
+      Object.entries(MODE_BUTTONS).forEach(([buttonMode, buttonEl]) => {
+        if (!buttonEl) {
+          return;
+        }
+        const visible = !modes || modes.includes(buttonMode);
+        buttonEl.style.display = visible ? '' : 'none';
+      });
+    }
+
+    // Reverse lookup (button element -> mode id), so we can read the mode
+    // straight off the actual DOM order of the exercise buttons.
+    const BUTTON_MODE = new Map(Object.entries(MODE_BUTTONS).map(([mode, buttonEl]) => [buttonEl, mode]));
+
+    // Builds the training session's exercise list from whichever exercise
+    // buttons are currently visible in the top picker, read left to right in
+    // DOM order. This guarantees a session always starts at the first
+    // (leftmost) visible exercise button and ends at the last (rightmost)
+    // one — whether that's the full 20-exercise row or a day's filtered set.
+    function buildSessionExercisesFromVisibleButtons() {
+      const orderedButtons = Array.from(document.querySelectorAll('.mode-switch .mode-btn'));
+      return orderedButtons
+        .filter((buttonEl) => buttonEl.style.display !== 'none')
+        .map((buttonEl) => BUTTON_MODE.get(buttonEl))
+        .map((mode) => trainingExercises.find((catalogEntry) => catalogEntry.mode === mode))
+        .filter(Boolean);
+    }
+
     function setMode(mode) {
       currentMode = mode;
-      const isCurls = mode === 'curls';
-      const isSquats = mode === 'squats';
       const exerciseInfo = trainingExercises.find((exercise) => exercise.mode === mode);
       if (exerciseInfo) {
         modeHeading.textContent = exerciseInfo.name;
       }
-      curlStats.style.display = isCurls ? 'flex' : 'none';
-      squatStats.style.display = isSquats ? 'flex' : 'none';
-      lungeStats.style.display = mode === 'lunges' ? 'flex' : 'none';
-      raiseStats.style.display = mode === 'raises' ? 'flex' : 'none';
-      sideRaiseStats.style.display = mode === 'sideRaises' ? 'flex' : 'none';
-      crunchStats.style.display = mode === 'crunches' ? 'flex' : 'none';
-      jackStats.style.display = mode === 'jacks' ? 'flex' : 'none';
-      modeCurlsButton.classList.toggle('active', isCurls);
-      modeSquatsButton.classList.toggle('active', isSquats);
-      modeLungesButton.classList.toggle('active', mode === 'lunges');
-      modeRaisesButton.classList.toggle('active', mode === 'raises');
-      modeSideRaisesButton.classList.toggle('active', mode === 'sideRaises');
-      modeCrunchesButton.classList.toggle('active', mode === 'crunches');
-      modeJacksButton.classList.toggle('active', mode === 'jacks');
+      if (modeSubtitleElement) {
+        modeSubtitleElement.textContent = MODE_TIPS[mode] || DEFAULT_MODE_SUBTITLE;
+      }
+
+      Object.entries(STATS_BY_MODE).forEach(([statsMode, statsEl]) => {
+        if (statsEl) {
+          statsEl.style.display = mode === statsMode ? 'flex' : 'none';
+        }
+      });
+
+      Object.entries(MODE_BUTTONS).forEach(([buttonMode, buttonEl]) => {
+        if (buttonEl) {
+          buttonEl.classList.toggle('active', mode === buttonMode);
+        }
+      });
     }
 
     function formatTime(seconds) {
@@ -1156,6 +2064,45 @@
       }
       if (mode === 'jacks') {
         return jackCounter;
+      }
+      if (mode === 'jumpSquats') {
+        return jumpSquatCounter;
+      }
+      if (mode === 'pushups') {
+        return pushupCounter;
+      }
+      if (mode === 'pikePushups') {
+        return pikePushupCounter;
+      }
+      if (mode === 'reverseLunges') {
+        return reverseLungeCounter;
+      }
+      if (mode === 'highKnees') {
+        return highKneeCounter;
+      }
+      if (mode === 'mountainClimbers') {
+        return climberCounter;
+      }
+      if (mode === 'burpees') {
+        return burpeeCounter;
+      }
+      if (mode === 'bicycleCrunches') {
+        return bicycleCounter;
+      }
+      if (mode === 'legRaises') {
+        return legRaiseCounter;
+      }
+      if (mode === 'shoulderTaps') {
+        return shoulderTapCounter;
+      }
+      if (mode === 'calfRaises') {
+        return calfRaiseCounter;
+      }
+      if (mode === 'walkingLunges') {
+        return walkingLungeCounter;
+      }
+      if (mode === 'gluteBridges') {
+        return gluteBridgeCounter;
       }
       return 0;
     }
@@ -1209,11 +2156,92 @@
         jackStageElement.textContent = 'Closed';
         jackArmsElement.textContent = 'Down';
         jackFeetElement.textContent = 'In';
+      } else if (mode === 'jumpSquats') {
+        jumpSquatCounter = 0;
+        jumpSquatStage = 'UP';
+        jumpSquatRepsElement.textContent = '0';
+        jumpSquatStageElement.textContent = 'None';
+        jumpSquatAngleElement.textContent = '0°';
+      } else if (mode === 'pushups') {
+        pushupCounter = 0;
+        pushupStage = 'UP';
+        pushupRepsElement.textContent = '0';
+        pushupStageElement.textContent = 'None';
+        pushupAngleElement.textContent = '0°';
+      } else if (mode === 'pikePushups') {
+        pikePushupCounter = 0;
+        pikePushupStage = 'UP';
+        pikePushupRepsElement.textContent = '0';
+        pikePushupStageElement.textContent = 'None';
+        pikePushupAngleElement.textContent = '0°';
+      } else if (mode === 'reverseLunges') {
+        reverseLungeCounter = 0;
+        reverseLungeStage = 'None';
+        reverseLungeSide = '-';
+        reverseLungeRepsElement.textContent = '0';
+        reverseLungeStageElement.textContent = 'None';
+        reverseLungeSideElement.textContent = '-';
+      } else if (mode === 'highKnees') {
+        highKneeCounter = 0;
+        highKneeStage = 'DOWN';
+        highKneeSide = '-';
+        highKneeRepsElement.textContent = '0';
+        highKneeStageElement.textContent = 'None';
+        highKneeSideElement.textContent = '-';
+      } else if (mode === 'mountainClimbers') {
+        climberCounter = 0;
+        climberStage = 'DOWN';
+        climberSide = '-';
+        climberRepsElement.textContent = '0';
+        climberStageElement.textContent = 'None';
+        climberSideElement.textContent = '-';
+      } else if (mode === 'burpees') {
+        burpeeCounter = 0;
+        burpeeStage = 'UP';
+        burpeeBaselineY = null;
+        burpeeRepsElement.textContent = '0';
+        burpeeStageElement.textContent = 'None';
+      } else if (mode === 'bicycleCrunches') {
+        bicycleCounter = 0;
+        bicycleStage = 'NONE';
+        bicycleRepsElement.textContent = '0';
+        bicycleStageElement.textContent = 'None';
+        bicycleSideElement.textContent = '-';
+      } else if (mode === 'legRaises') {
+        legRaiseCounter = 0;
+        legRaiseStage = 'DOWN';
+        legRaiseRepsElement.textContent = '0';
+        legRaiseStageElement.textContent = 'None';
+        legRaiseAngleElement.textContent = '0°';
+      } else if (mode === 'shoulderTaps') {
+        shoulderTapCounter = 0;
+        shoulderTapStage = 'NONE';
+        shoulderTapRepsElement.textContent = '0';
+        shoulderTapStageElement.textContent = 'None';
+        shoulderTapSideElement.textContent = '-';
+      } else if (mode === 'calfRaises') {
+        calfRaiseCounter = 0;
+        calfRaiseStage = 'DOWN';
+        calfRaiseRepsElement.textContent = '0';
+        calfRaiseStageElement.textContent = 'None';
+      } else if (mode === 'walkingLunges') {
+        walkingLungeCounter = 0;
+        walkingLungeStage = 'None';
+        walkingLungeSide = '-';
+        walkingLungeRepsElement.textContent = '0';
+        walkingLungeStageElement.textContent = 'None';
+        walkingLungeSideElement.textContent = '-';
+      } else if (mode === 'gluteBridges') {
+        gluteBridgeCounter = 0;
+        gluteBridgeStage = 'DOWN';
+        gluteBridgeRepsElement.textContent = '0';
+        gluteBridgeStageElement.textContent = 'None';
+        gluteBridgeAngleElement.textContent = '0°';
       }
     }
 
     function updateTrainingClock() {
-      const exercise = trainingExercises[trainingIndex];
+      const exercise = activeSessionExercises[trainingIndex];
       trainingExerciseElement.textContent = exercise ? exercise.name : 'Training';
       trainingTimerElement.textContent = formatTime(trainingSecondsLeft);
     }
@@ -1224,6 +2252,14 @@
       trainingDock.style.right = '';
       trainingDock.style.bottom = '';
       trainingDock.style.transform = '';
+    }
+
+    function resetTrainingClockPosition() {
+      trainingClock.style.left = '';
+      trainingClock.style.top = '';
+      trainingClock.style.right = '';
+      trainingClock.style.bottom = '';
+      trainingClock.style.transform = '';
     }
 
     function setTrainingControlsVisible(isSessionVisible) {
@@ -1265,7 +2301,7 @@
     }
 
     function startExerciseSegment() {
-      const exercise = trainingExercises[trainingIndex];
+      const exercise = activeSessionExercises[trainingIndex];
       if (!exercise) {
         finishTrainingSession();
         return;
@@ -1283,7 +2319,7 @@
       window.clearInterval(trainingTimerId);
       trainingTimerId = null;
 
-      const exercise = trainingExercises[trainingIndex];
+      const exercise = activeSessionExercises[trainingIndex];
       trainingResults.push({
         mode: exercise.mode,
         name: exercise.name,
@@ -1295,7 +2331,7 @@
     }
 
     function captureCurrentExerciseResult() {
-      const exercise = trainingExercises[trainingIndex];
+      const exercise = activeSessionExercises[trainingIndex];
       if (!exercise || trainingResults.some((result) => result.mode === exercise.mode)) {
         return;
       }
@@ -1310,7 +2346,7 @@
     function fillMissingTrainingResults() {
       const savedModes = new Set(trainingResults.map((result) => result.mode));
 
-      trainingExercises.forEach((exercise) => {
+      activeSessionExercises.forEach((exercise) => {
         if (!savedModes.has(exercise.mode)) {
           trainingResults.push({
             mode: exercise.mode,
@@ -1421,6 +2457,7 @@
       trainingPaused = false;
       trainingClock.classList.remove('active');
       resetTrainingDockPosition();
+      resetTrainingClockPosition();
       setTrainingControlsVisible(false);
       startTrainingButton.textContent = 'Start Training';
       pauseTrainingButton.textContent = 'Pause';
@@ -1443,6 +2480,7 @@
       resultsOverlay.setAttribute('aria-hidden', 'true');
       trainingClock.classList.add('active');
       resetTrainingDockPosition();
+      resetTrainingClockPosition();
       setTrainingControlsVisible(true);
       startTrainingButton.textContent = 'Training...';
       pauseTrainingButton.textContent = 'Pause';
@@ -1456,7 +2494,7 @@
 
       trainingPaused = !trainingPaused;
       pauseTrainingButton.textContent = trainingPaused ? 'Resume' : 'Pause';
-      trainingExerciseElement.textContent = trainingPaused ? 'Paused' : trainingExercises[trainingIndex].name;
+      trainingExerciseElement.textContent = trainingPaused ? 'Paused' : activeSessionExercises[trainingIndex].name;
 
       if (trainingPaused) {
         window.clearTimeout(trainingCueTimeoutId);
@@ -1477,6 +2515,7 @@
       trainingPaused = false;
       trainingClock.classList.remove('active');
       resetTrainingDockPosition();
+      resetTrainingClockPosition();
       setTrainingControlsVisible(false);
       startTrainingButton.textContent = 'Start Training';
       pauseTrainingButton.textContent = 'Pause';
@@ -1508,6 +2547,19 @@
     modeSideRaisesButton.addEventListener('click', () => !trainingActive && setMode('sideRaises'));
     modeCrunchesButton.addEventListener('click', () => !trainingActive && setMode('crunches'));
     modeJacksButton.addEventListener('click', () => !trainingActive && setMode('jacks'));
+    modeJumpSquatsButton.addEventListener('click', () => !trainingActive && setMode('jumpSquats'));
+    modePushupsButton.addEventListener('click', () => !trainingActive && setMode('pushups'));
+    modePikePushupsButton.addEventListener('click', () => !trainingActive && setMode('pikePushups'));
+    modeReverseLungesButton.addEventListener('click', () => !trainingActive && setMode('reverseLunges'));
+    modeWalkingLungesButton.addEventListener('click', () => !trainingActive && setMode('walkingLunges'));
+    modeHighKneesButton.addEventListener('click', () => !trainingActive && setMode('highKnees'));
+    modeMountainClimbersButton.addEventListener('click', () => !trainingActive && setMode('mountainClimbers'));
+    modeBurpeesButton.addEventListener('click', () => !trainingActive && setMode('burpees'));
+    modeBicycleCrunchesButton.addEventListener('click', () => !trainingActive && setMode('bicycleCrunches'));
+    modeLegRaisesButton.addEventListener('click', () => !trainingActive && setMode('legRaises'));
+    modeShoulderTapsButton.addEventListener('click', () => !trainingActive && setMode('shoulderTaps'));
+    modeCalfRaisesButton.addEventListener('click', () => !trainingActive && setMode('calfRaises'));
+    modeGluteBridgesButton.addEventListener('click', () => !trainingActive && setMode('gluteBridges'));
 
     function updateZoomControls() {
       zoomLevelButton.textContent = `${cameraZoom.toFixed(1)}x`;
@@ -1542,12 +2594,141 @@
 
     updateZoomControls();
 
+    let exercisesCollapsed = false;
+
+    toggleExercisesButton.addEventListener('click', () => {
+      exercisesCollapsed = !exercisesCollapsed;
+      modeSwitchElement.classList.toggle('collapsed', exercisesCollapsed);
+      toggleExercisesButton.textContent = exercisesCollapsed ? 'Exercises ▸' : 'Exercises ▾';
+      toggleExercisesButton.setAttribute('aria-expanded', String(!exercisesCollapsed));
+    });
+
+    // Collapsible camera zoom/fit controls, day picker, and bottom exercise
+    // info stats — each has its own small toggle so users can hide/reveal
+    // that button group independently.
+    let cameraControlsCollapsed = false;
+    if (toggleCameraControlsButton && cameraControlsBodyElement) {
+      toggleCameraControlsButton.addEventListener('click', () => {
+        cameraControlsCollapsed = !cameraControlsCollapsed;
+        cameraControlsBodyElement.classList.toggle('collapsed', cameraControlsCollapsed);
+        toggleCameraControlsButton.setAttribute('aria-expanded', String(!cameraControlsCollapsed));
+      });
+    }
+
+    let dayRailCollapsed = false;
+    if (toggleDayRailButton && dayRailBodyElement) {
+      toggleDayRailButton.addEventListener('click', () => {
+        dayRailCollapsed = !dayRailCollapsed;
+        dayRailBodyElement.classList.toggle('collapsed', dayRailCollapsed);
+        toggleDayRailButton.setAttribute('aria-expanded', String(!dayRailCollapsed));
+      });
+    }
+
+    let statsCollapsed = false;
+    if (toggleStatsButton && statsWrapElement) {
+      toggleStatsButton.addEventListener('click', () => {
+        statsCollapsed = !statsCollapsed;
+        statsWrapElement.classList.toggle('collapsed', statsCollapsed);
+        toggleStatsButton.innerHTML = statsCollapsed ? 'Info &#9656;' : 'Info &#9662;';
+        toggleStatsButton.setAttribute('aria-expanded', String(!statsCollapsed));
+      });
+    }
+
     closeSummaryButton.addEventListener('click', () => {
       resultsOverlay.classList.remove('show');
       resultsOverlay.setAttribute('aria-hidden', 'true');
     });
 
+    function openDayPlan(dayIndex) {
+      const day = WEEKLY_PROGRAM[dayIndex];
+      if (!day) {
+        return;
+      }
+
+      selectedDayIndex = dayIndex;
+      dayPlanTitleElement.textContent = `Day ${dayIndex + 1} – ${day.title}`;
+
+      if (day.subtitle) {
+        dayPlanSubtitleElement.textContent = day.subtitle;
+        dayPlanSubtitleElement.style.display = 'block';
+      } else {
+        dayPlanSubtitleElement.textContent = '';
+        dayPlanSubtitleElement.style.display = 'none';
+      }
+
+      dayPlanListElement.innerHTML = '';
+      day.exercises.forEach((exercise) => {
+        const item = document.createElement('li');
+        item.textContent = exercise.label;
+        dayPlanListElement.appendChild(item);
+      });
+
+      dayButtons.forEach((button) => {
+        button.classList.toggle('selected', Number(button.dataset.dayIndex) === dayIndex);
+      });
+
+      const dayModes = day.exercises.map((exercise) => exercise.mode);
+      applyModeButtonFilter(dayModes);
+      if (!trainingActive && dayModes.length) {
+        setMode(dayModes[0]);
+      }
+
+      dayPlanOverlay.classList.add('show');
+      dayPlanOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDayPlan() {
+      dayPlanOverlay.classList.remove('show');
+      dayPlanOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    dayButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (trainingActive) {
+          return;
+        }
+        openDayPlan(Number(button.dataset.dayIndex));
+      });
+    });
+
+    closeDayPlanButton.addEventListener('click', closeDayPlan);
+
+    dayPlanOverlay.addEventListener('click', (event) => {
+      if (event.target === dayPlanOverlay) {
+        closeDayPlan();
+      }
+    });
+
+    startDayTrainingButton.addEventListener('click', () => {
+      if (selectedDayIndex === null) {
+        return;
+      }
+
+      // The top picker is already filtered to this day's buttons (set in
+      // openDayPlan), so reading it left-to-right gives the day's exercises
+      // in the same order they're displayed.
+      activeSessionExercises = buildSessionExercisesFromVisibleButtons();
+
+      closeDayPlan();
+      startTrainingSession();
+    });
+
+    showAllExercisesButton.addEventListener('click', () => {
+      if (trainingActive) {
+        return;
+      }
+      selectedDayIndex = null;
+      dayButtons.forEach((button) => button.classList.remove('selected'));
+      applyModeButtonFilter(null);
+      activeSessionExercises = trainingExercises;
+    });
+
+    // The main dock's "Start Training" button always runs the exercises
+    // currently visible in the top picker, in left-to-right order — the
+    // full catalog when nothing is filtered, or just a day's exercises when
+    // one is selected.
     startTrainingButton.addEventListener('click', () => {
+      activeSessionExercises = buildSessionExercisesFromVisibleButtons();
       startTrainingSession();
       draggedStartButton = false;
     });
@@ -1623,6 +2804,107 @@
       window.addEventListener('pointermove', moveButton);
       window.addEventListener('pointerup', stopDrag);
       window.addEventListener('pointercancel', stopDrag);
+    });
+
+    function rectsOverlap(a, b) {
+      return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+    }
+
+    // Matches the two breakpoints where CSS scales the clock down further
+    // (see .training-clock rules), so a manual drag can preserve that size
+    // instead of the drag snapping it back to full scale.
+    function getTrainingClockScale() {
+      return window.matchMedia('(max-width: 760px)').matches ? 0.69 : 0.77;
+    }
+
+    // The timer is draggable, but it's clamped so it can never be dropped on
+    // top of the other persistent controls (zoom/day rails, the training
+    // dock, or the bottom stats bar) — it'll simply stop at the edge of
+    // whichever one is in the way.
+    trainingClock.addEventListener('pointerdown', (event) => {
+      const shellRect = document.querySelector('.app-shell').getBoundingClientRect();
+      const clockRect = trainingClock.getBoundingClientRect();
+      const offsetX = event.clientX - clockRect.left;
+      const offsetY = event.clientY - clockRect.top;
+      const clockScale = getTrainingClockScale();
+
+      const avoidElements = ['.camera-controls', '.day-rail', '.training-dock', '.bottom-controls']
+        .map((selector) => document.querySelector(selector))
+        .filter((el) => el);
+      const avoidRects = avoidElements.map((el) => el.getBoundingClientRect());
+
+      function moveClock(moveEvent) {
+        const maxLeft = shellRect.width - clockRect.width;
+        const maxTop = shellRect.height - clockRect.height;
+        const nextLeft = Math.min(Math.max(moveEvent.clientX - shellRect.left - offsetX, 0), maxLeft);
+        const nextTop = Math.min(Math.max(moveEvent.clientY - shellRect.top - offsetY, 0), maxTop);
+
+        const candidate = {
+          left: shellRect.left + nextLeft,
+          top: shellRect.top + nextTop,
+          right: shellRect.left + nextLeft + clockRect.width,
+          bottom: shellRect.top + nextTop + clockRect.height,
+        };
+
+        if (avoidRects.some((rect) => rectsOverlap(candidate, rect))) {
+          return;
+        }
+
+        trainingClock.style.left = `${nextLeft}px`;
+        trainingClock.style.top = `${nextTop}px`;
+        trainingClock.style.right = 'auto';
+        trainingClock.style.bottom = 'auto';
+        trainingClock.style.transform = `scale(${clockScale})`;
+      }
+
+      function stopDrag() {
+        window.removeEventListener('pointermove', moveClock);
+        window.removeEventListener('pointerup', stopDrag);
+        window.removeEventListener('pointercancel', stopDrag);
+      }
+
+      window.addEventListener('pointermove', moveClock);
+      window.addEventListener('pointerup', stopDrag);
+      window.addEventListener('pointercancel', stopDrag);
+    });
+
+    // If the timer or the training dock has been manually dragged to a
+    // specific spot, their position is pinned in raw pixels. Resizing the
+    // window (or rotating/resizing on mobile) can otherwise push a pinned
+    // element outside the new viewport, so re-clamp both back inside the
+    // app-shell bounds whenever the window size changes.
+    function clampDraggableToShell(el) {
+      if (!el || (!el.style.left && !el.style.top)) {
+        return;
+      }
+
+      const shellRect = document.querySelector('.app-shell').getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      const currentLeft = rect.left - shellRect.left;
+      const currentTop = rect.top - shellRect.top;
+      const maxLeft = Math.max(0, shellRect.width - rect.width);
+      const maxTop = Math.max(0, shellRect.height - rect.height);
+      const clampedLeft = Math.min(Math.max(currentLeft, 0), maxLeft);
+      const clampedTop = Math.min(Math.max(currentTop, 0), maxTop);
+
+      if (Math.abs(clampedLeft - currentLeft) > 0.5) {
+        el.style.left = `${clampedLeft}px`;
+      }
+      if (Math.abs(clampedTop - currentTop) > 0.5) {
+        el.style.top = `${clampedTop}px`;
+      }
+    }
+
+    let resizeClampRaf = null;
+    window.addEventListener('resize', () => {
+      if (resizeClampRaf) {
+        return;
+      }
+      resizeClampRaf = requestAnimationFrame(() => {
+        resizeClampRaf = null;
+        clampDraggableToShell(trainingDock);
+        clampDraggableToShell(trainingClock);
+      });
     });
 
     function onResults(results) {
@@ -1861,6 +3143,375 @@
             crunchRepsElement.textContent = crunchCounter;
             crunchStageElement.textContent = crunchStage;
             crunchAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'jumpSquats') {
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            const jumpUpdate = updateTwoStateRep(
+              jumpSquatStage,
+              jumpSquatCounter,
+              averageAngle < 100,
+              'DOWN',
+              averageAngle > 150,
+              'UP'
+            );
+            jumpSquatStage = jumpUpdate.stage;
+            jumpSquatCounter = jumpUpdate.counter;
+
+            jumpSquatStageElement.textContent = jumpSquatStage;
+            jumpSquatRepsElement.textContent = jumpSquatCounter;
+            jumpSquatAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'pushups') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftElbow = results.poseLandmarks[13];
+          const leftWrist = results.poseLandmarks[15];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightElbow = results.poseLandmarks[14];
+          const rightWrist = results.poseLandmarks[16];
+
+          if (leftShoulder && leftElbow && leftWrist && rightShoulder && rightElbow && rightWrist) {
+            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            const pushupUpdate = updateTwoStateRep(
+              pushupStage,
+              pushupCounter,
+              averageAngle < 90,
+              'DOWN',
+              averageAngle > 150,
+              'UP'
+            );
+            pushupStage = pushupUpdate.stage;
+            pushupCounter = pushupUpdate.counter;
+
+            pushupStageElement.textContent = pushupStage;
+            pushupRepsElement.textContent = pushupCounter;
+            pushupAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'pikePushups') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftElbow = results.poseLandmarks[13];
+          const leftWrist = results.poseLandmarks[15];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightElbow = results.poseLandmarks[14];
+          const rightWrist = results.poseLandmarks[16];
+
+          if (leftShoulder && leftElbow && leftWrist && rightShoulder && rightElbow && rightWrist) {
+            const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+            const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            const pikeUpdate = updateTwoStateRep(
+              pikePushupStage,
+              pikePushupCounter,
+              averageAngle < 100,
+              'DOWN',
+              averageAngle > 150,
+              'UP'
+            );
+            pikePushupStage = pikeUpdate.stage;
+            pikePushupCounter = pikeUpdate.counter;
+
+            pikePushupStageElement.textContent = pikePushupStage;
+            pikePushupRepsElement.textContent = pikePushupCounter;
+            pikePushupAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'reverseLunges') {
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const leftActive = leftAngle < 120;
+            const rightActive = rightAngle < 120;
+
+            const lungeUpdate = updateSidedRep(
+              reverseLungeStage,
+              reverseLungeCounter,
+              reverseLungeSide,
+              leftActive,
+              rightActive,
+              'DOWN',
+              'UP'
+            );
+            reverseLungeStage = lungeUpdate.stage;
+            reverseLungeCounter = lungeUpdate.counter;
+            reverseLungeSide = lungeUpdate.side;
+
+            reverseLungeRepsElement.textContent = reverseLungeCounter;
+            reverseLungeStageElement.textContent = reverseLungeStage;
+            reverseLungeSideElement.textContent = reverseLungeSide;
+          }
+        } else if (currentMode === 'walkingLunges') {
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const leftActive = leftAngle < 120;
+            const rightActive = rightAngle < 120;
+
+            const lungeUpdate = updateSidedRep(
+              walkingLungeStage,
+              walkingLungeCounter,
+              walkingLungeSide,
+              leftActive,
+              rightActive,
+              'DOWN',
+              'UP'
+            );
+            walkingLungeStage = lungeUpdate.stage;
+            walkingLungeCounter = lungeUpdate.counter;
+            walkingLungeSide = lungeUpdate.side;
+
+            walkingLungeRepsElement.textContent = walkingLungeCounter;
+            walkingLungeStageElement.textContent = walkingLungeStage;
+            walkingLungeSideElement.textContent = walkingLungeSide;
+          }
+        } else if (currentMode === 'highKnees') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+
+          if (leftShoulder && leftHip && leftKnee && rightShoulder && rightHip && rightKnee) {
+            const leftAngle = calculateAngle(leftShoulder, leftHip, leftKnee);
+            const rightAngle = calculateAngle(rightShoulder, rightHip, rightKnee);
+            const leftActive = leftAngle < 110;
+            const rightActive = rightAngle < 110;
+
+            const kneeUpdate = updateSidedRep(
+              highKneeStage,
+              highKneeCounter,
+              highKneeSide,
+              leftActive,
+              rightActive,
+              'UP',
+              'DOWN'
+            );
+            highKneeStage = kneeUpdate.stage;
+            highKneeCounter = kneeUpdate.counter;
+            highKneeSide = kneeUpdate.side;
+
+            highKneeRepsElement.textContent = highKneeCounter;
+            highKneeStageElement.textContent = highKneeStage;
+            highKneeSideElement.textContent = highKneeSide;
+          }
+        } else if (currentMode === 'mountainClimbers') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+
+          if (leftShoulder && leftHip && leftKnee && rightShoulder && rightHip && rightKnee) {
+            const leftAngle = calculateAngle(leftShoulder, leftHip, leftKnee);
+            const rightAngle = calculateAngle(rightShoulder, rightHip, rightKnee);
+            const leftActive = leftAngle < 120;
+            const rightActive = rightAngle < 120;
+
+            const climberUpdate = updateSidedRep(
+              climberStage,
+              climberCounter,
+              climberSide,
+              leftActive,
+              rightActive,
+              'IN',
+              'OUT'
+            );
+            climberStage = climberUpdate.stage;
+            climberCounter = climberUpdate.counter;
+            climberSide = climberUpdate.side;
+
+            climberRepsElement.textContent = climberCounter;
+            climberStageElement.textContent = climberStage;
+            climberSideElement.textContent = climberSide;
+          }
+        } else if (currentMode === 'burpees') {
+          const leftHip = results.poseLandmarks[23];
+          const rightHip = results.poseLandmarks[24];
+          const leftKnee = results.poseLandmarks[25];
+          const rightKnee = results.poseLandmarks[26];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftHip && rightHip && leftKnee && rightKnee && leftAnkle && rightAnkle) {
+            const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+            const hipY = (leftHip.y + rightHip.y) / 2;
+
+            const burpeeUpdate = updateBurpee(burpeeStage, burpeeCounter, burpeeBaselineY, hipY, averageAngle);
+            burpeeStage = burpeeUpdate.stage;
+            burpeeCounter = burpeeUpdate.counter;
+            burpeeBaselineY = burpeeUpdate.baselineY;
+
+            burpeeRepsElement.textContent = burpeeCounter;
+            burpeeStageElement.textContent = burpeeStage;
+          }
+        } else if (currentMode === 'bicycleCrunches') {
+          const leftShoulder = results.poseLandmarks[11];
+          const rightShoulder = results.poseLandmarks[12];
+          const leftElbow = results.poseLandmarks[13];
+          const rightElbow = results.poseLandmarks[14];
+          const leftKnee = results.poseLandmarks[25];
+          const rightKnee = results.poseLandmarks[26];
+
+          if (leftShoulder && rightShoulder && leftElbow && rightElbow && leftKnee && rightKnee) {
+            const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x) || 0.2;
+            const touchThreshold = shoulderWidth * 0.9;
+            const crossLeftDistance = landmarkDistance(leftElbow, rightKnee);
+            const crossRightDistance = landmarkDistance(rightElbow, leftKnee);
+            const leftTouch = crossLeftDistance < touchThreshold;
+            const rightTouch = crossRightDistance < touchThreshold;
+
+            const bicycleUpdate = updateAlternatingTouch(bicycleStage, bicycleCounter, leftTouch, rightTouch);
+            bicycleStage = bicycleUpdate.stage;
+            bicycleCounter = bicycleUpdate.counter;
+
+            bicycleRepsElement.textContent = bicycleCounter;
+            bicycleStageElement.textContent = bicycleStage === 'NONE' ? 'None' : bicycleStage;
+            bicycleSideElement.textContent =
+              bicycleStage === 'L' ? 'Left' : bicycleStage === 'R' ? 'Right' : '-';
+          }
+        } else if (currentMode === 'legRaises') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftHip = results.poseLandmarks[23];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightHip = results.poseLandmarks[24];
+          const rightAnkle = results.poseLandmarks[28];
+
+          if (leftShoulder && leftHip && leftAnkle && rightShoulder && rightHip && rightAnkle) {
+            const leftAngle = calculateAngle(leftShoulder, leftHip, leftAnkle);
+            const rightAngle = calculateAngle(rightShoulder, rightHip, rightAnkle);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            const legRaiseUpdate = updateTwoStateRep(
+              legRaiseStage,
+              legRaiseCounter,
+              averageAngle > 150,
+              'DOWN',
+              averageAngle < 90,
+              'UP'
+            );
+            legRaiseStage = legRaiseUpdate.stage;
+            legRaiseCounter = legRaiseUpdate.counter;
+
+            legRaiseStageElement.textContent = legRaiseStage;
+            legRaiseRepsElement.textContent = legRaiseCounter;
+            legRaiseAngleElement.textContent = `${Math.round(averageAngle)}°`;
+          }
+        } else if (currentMode === 'shoulderTaps') {
+          const leftShoulder = results.poseLandmarks[11];
+          const rightShoulder = results.poseLandmarks[12];
+          const leftWrist = results.poseLandmarks[15];
+          const rightWrist = results.poseLandmarks[16];
+
+          if (leftShoulder && rightShoulder && leftWrist && rightWrist) {
+            const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x) || 0.2;
+            const touchThreshold = shoulderWidth * 0.55;
+            const leftHandToRightShoulder = landmarkDistance(leftWrist, rightShoulder);
+            const rightHandToLeftShoulder = landmarkDistance(rightWrist, leftShoulder);
+            const leftTouch = leftHandToRightShoulder < touchThreshold;
+            const rightTouch = rightHandToLeftShoulder < touchThreshold;
+
+            const tapUpdate = updateAlternatingTouch(shoulderTapStage, shoulderTapCounter, leftTouch, rightTouch);
+            shoulderTapStage = tapUpdate.stage;
+            shoulderTapCounter = tapUpdate.counter;
+
+            shoulderTapRepsElement.textContent = shoulderTapCounter;
+            shoulderTapStageElement.textContent = shoulderTapStage === 'NONE' ? 'None' : shoulderTapStage;
+            shoulderTapSideElement.textContent =
+              shoulderTapStage === 'L' ? 'Left' : shoulderTapStage === 'R' ? 'Right' : '-';
+          }
+        } else if (currentMode === 'calfRaises') {
+          const leftHip = results.poseLandmarks[23];
+          const rightHip = results.poseLandmarks[24];
+          const leftKnee = results.poseLandmarks[25];
+          const rightKnee = results.poseLandmarks[26];
+          const leftAnkle = results.poseLandmarks[27];
+          const rightAnkle = results.poseLandmarks[28];
+          const leftHeel = results.poseLandmarks[29];
+          const rightHeel = results.poseLandmarks[30];
+          const leftFootIndex = results.poseLandmarks[31];
+          const rightFootIndex = results.poseLandmarks[32];
+
+          if (
+            leftHip && rightHip && leftKnee && rightKnee && leftAnkle && rightAnkle &&
+            leftHeel && rightHeel && leftFootIndex && rightFootIndex
+          ) {
+            const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            const kneeAngle = (leftKneeAngle + rightKneeAngle) / 2;
+            const lift = (leftFootIndex.y - leftHeel.y + (rightFootIndex.y - rightHeel.y)) / 2;
+
+            const calfUpdate = updateTwoStateRep(
+              calfRaiseStage,
+              calfRaiseCounter,
+              lift < 0.015 && kneeAngle > 160,
+              'DOWN',
+              lift > 0.04 && kneeAngle > 160,
+              'UP'
+            );
+            calfRaiseStage = calfUpdate.stage;
+            calfRaiseCounter = calfUpdate.counter;
+
+            calfRaiseStageElement.textContent = calfRaiseStage;
+            calfRaiseRepsElement.textContent = calfRaiseCounter;
+          }
+        } else if (currentMode === 'gluteBridges') {
+          const leftShoulder = results.poseLandmarks[11];
+          const leftHip = results.poseLandmarks[23];
+          const leftKnee = results.poseLandmarks[25];
+          const rightShoulder = results.poseLandmarks[12];
+          const rightHip = results.poseLandmarks[24];
+          const rightKnee = results.poseLandmarks[26];
+
+          if (leftShoulder && leftHip && leftKnee && rightShoulder && rightHip && rightKnee) {
+            const leftAngle = calculateAngle(leftShoulder, leftHip, leftKnee);
+            const rightAngle = calculateAngle(rightShoulder, rightHip, rightKnee);
+            const averageAngle = (leftAngle + rightAngle) / 2;
+
+            const bridgeUpdate = updateTwoStateRep(
+              gluteBridgeStage,
+              gluteBridgeCounter,
+              averageAngle < 130,
+              'DOWN',
+              averageAngle > 165,
+              'UP'
+            );
+            gluteBridgeStage = bridgeUpdate.stage;
+            gluteBridgeCounter = bridgeUpdate.counter;
+
+            gluteBridgeStageElement.textContent = gluteBridgeStage;
+            gluteBridgeRepsElement.textContent = gluteBridgeCounter;
+            gluteBridgeAngleElement.textContent = `${Math.round(averageAngle)}°`;
           }
         }
       }
