@@ -14,6 +14,16 @@
          screens. Still bounded by clamp() so it can't overflow. */
       --mbtn-size: clamp(40px, 4vw, 74px);
       --mbtn-gap: clamp(6px, 1vw, 10px);
+
+      /* Pixel Fit design tokens */
+      --pf-bg: #050505;
+      --pf-glow: #222222;
+      --pf-panel: rgba(18, 18, 18, 0.82);
+      --pf-panel-border: rgba(255, 255, 255, 0.08);
+      --pf-card: #111111;
+      --pf-accent: #d7ff2f;
+      --pf-accent-soft: #c6ff00;
+      --pf-text-dim: rgba(255, 255, 255, 0.82);
     }
 
     @media (max-width: 760px) {
@@ -36,8 +46,8 @@
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at center top, var(--pf-glow), var(--pf-bg) 65%);
       color: #fff;
       min-height: 100vh;
       overflow: hidden;
@@ -100,21 +110,39 @@
       pointer-events: none;
     }
 
-    .info-toggle-btn {
+    /* ---------- Small pill "toggle" buttons (info / exercises) ---------- */
+
+    .info-toggle-btn,
+    .toggle-exercises-btn {
       pointer-events: auto;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      display: block;
+      margin: 0 auto;
+      border: 1px solid var(--pf-accent-soft);
       border-radius: 999px;
       background: rgba(10, 10, 10, 0.72);
-      color: #fff;
-      font-size: 0.62rem;
+      color: var(--pf-accent-soft);
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.01em;
-      padding: 4px 10px;
+      padding: 5px 12px;
       cursor: pointer;
       backdrop-filter: blur(6px);
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
-    .info-toggle-btn:active {
+    .info-toggle-btn {
+      font-size: 0.62rem;
+      padding: 4px 10px;
+    }
+
+    .info-toggle-btn:hover,
+    .toggle-exercises-btn:hover {
+      background: var(--pf-accent-soft);
+      color: #050505;
+    }
+
+    .info-toggle-btn:active,
+    .toggle-exercises-btn:active {
       transform: scale(0.96);
     }
 
@@ -135,6 +163,8 @@
       pointer-events: none;
     }
 
+    /* ---------- Header ---------- */
+
     header {
       text-align: center;
       max-width: 720px;
@@ -145,15 +175,24 @@
     }
 
     header h1 {
-      margin: 0 0 4px;
-      font-size: clamp(1.1rem, 2vw, 1.7rem);
+      display: block;
+      margin: 0 0 6px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-transform: none;
     }
 
     header p {
-      margin: 0;
-      font-size: clamp(0.8rem, 1.4vw, 0.95rem);
-      opacity: 0.9;
+      display: block;
+      margin: 0 0 14px;
+      font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+      font-weight: 500;
+      color: var(--pf-text-dim);
     }
+
+    /* ---------- Exercise mode switcher ---------- */
 
     .mode-switch {
       display: flex;
@@ -194,42 +233,22 @@
       pointer-events: none;
     }
 
-    .toggle-exercises-btn {
-      pointer-events: auto;
-      display: block;
-      margin: 0 auto;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
-      background: rgba(10, 10, 10, 0.72);
-      color: #fff;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      padding: 5px 12px;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-    }
-
-    .toggle-exercises-btn:active {
-      transform: scale(0.96);
-    }
-
     .mode-btn {
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       flex: 0 0 var(--mbtn-size);
       width: var(--mbtn-size);
       height: var(--mbtn-size);
       padding: clamp(5px, 0.8vw, 7px);
-      border-radius: 50%;
+      border-radius: 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       scroll-snap-align: start;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
 
     .mode-btn img {
@@ -240,14 +259,17 @@
       pointer-events: none;
     }
 
-    .mode-btn.active {
-      background: #00ffaa;
-      border-color: #00ffaa;
+    .mode-btn.active,
+    .mode-btn:hover {
+      background: var(--pf-accent);
+      border-color: var(--pf-accent);
+      color: #000;
       transform: scale(1.06);
     }
 
-    .mode-btn.active img {
-      filter: invert(1);
+    .mode-btn.active img,
+    .mode-btn:hover img {
+      filter: brightness(0) saturate(100%);
     }
 
     .mode-btn.text-btn span {
@@ -261,6 +283,8 @@
       color: #06251c;
     }
 
+    /* ---------- Live stats readout ---------- */
+
     .status {
       display: flex;
       gap: clamp(3px, 0.68vw, 5px);
@@ -272,15 +296,15 @@
     }
 
     .status > div {
-      background: rgba(10, 10, 10, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: var(--pf-panel);
+      border: 1px solid var(--pf-panel-border);
       padding: clamp(4px, 0.6vw, 6px) clamp(5px, 0.77vw, 7px);
-      border-radius: 8px;
+      border-radius: 18px;
       min-width: clamp(46px, 4.6vw, 54px);
       flex: 1 1 clamp(46px, 4.6vw, 54px);
       text-align: center;
       max-width: clamp(77px, 9.2vw, 92px);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
     }
 
     .status strong {
@@ -310,6 +334,8 @@
       object-fit: contain;
     }
 
+    /* ---------- Camera zoom/fit rail ---------- */
+
     .camera-controls {
       position: absolute;
       right: clamp(8px, 2.4vw, 18px);
@@ -336,8 +362,8 @@
       width: clamp(26px, 3.6vw, 32px);
       height: clamp(26px, 3.6vw, 32px);
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       font-size: 0.8rem;
       font-weight: 700;
@@ -346,7 +372,7 @@
       align-items: center;
       justify-content: center;
       padding: 0;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       transition: transform 0.1s ease, background 0.15s ease;
     }
 
@@ -374,9 +400,9 @@
     .camera-controls .zoom-btn {
       width: clamp(32px, 4.6vw, 40px);
       height: clamp(32px, 4.6vw, 40px);
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border-radius: 18px;
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       font-size: 1.05rem;
       font-weight: 700;
@@ -384,7 +410,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       line-height: 1;
       padding: 0;
       transition: transform 0.1s ease, opacity 0.15s ease;
@@ -402,15 +428,15 @@
     .camera-controls .zoom-level {
       font-size: 0.64rem;
       font-weight: 700;
-      color: #00ffaa;
-      background: rgba(10, 10, 10, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--pf-accent);
+      background: var(--pf-panel);
+      border: 1px solid var(--pf-panel-border);
       border-radius: 999px;
       padding: 4px 3px;
       width: clamp(32px, 4.6vw, 40px);
       text-align: center;
       cursor: pointer;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
     }
 
     .camera-controls .divider {
@@ -428,17 +454,44 @@
       font-size: 0.58rem;
       font-weight: 700;
       letter-spacing: 0.02em;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       cursor: pointer;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       transition: transform 0.1s ease;
     }
 
     .camera-controls .fit-btn:active {
       transform: scale(0.92);
     }
+
+    .camera-controls .flip-btn {
+      border-radius: 10px;
+      width: clamp(32px, 4.6vw, 40px);
+      height: clamp(32px, 4.6vw, 40px);
+      padding: 0 2px;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(18px);
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    .camera-controls .flip-btn:active {
+      transform: scale(0.92);
+    }
+
+    .camera-controls .flip-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* ---------- Day picker rail ---------- */
 
     .day-rail {
       position: absolute;
@@ -472,14 +525,14 @@
       width: clamp(26px, 3.6vw, 32px);
       height: clamp(26px, 3.6vw, 32px);
       border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       font-size: 0.68rem;
       font-weight: 800;
       cursor: pointer;
       padding: 0;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
     }
 
@@ -488,9 +541,9 @@
     }
 
     .day-rail .day-btn.selected {
-      background: #00ffaa;
-      border-color: #00ffaa;
-      color: #06251c;
+      background: var(--pf-accent);
+      border-color: var(--pf-accent);
+      color: #000;
     }
 
     .day-rail .day-btn-last {
@@ -513,17 +566,19 @@
       font-size: 0.58rem;
       font-weight: 700;
       letter-spacing: 0.02em;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       cursor: pointer;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       transition: transform 0.1s ease;
     }
 
     .day-rail .all-btn:active {
       transform: scale(0.92);
     }
+
+    /* ---------- Training clock / cue / dock ---------- */
 
     .training-clock {
       position: absolute;
@@ -532,12 +587,12 @@
       z-index: 6;
       min-width: 100px;
       padding: 7px 8px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      border-radius: 18px;
+      background: var(--pf-panel);
       text-align: center;
       pointer-events: none;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(18px);
       display: none;
       cursor: grab;
       touch-action: none;
@@ -572,7 +627,7 @@
       top: clamp(215px, 32vh, 290px);
       left: 50%;
       z-index: 4;
-      color: #00ffaa;
+      color: var(--pf-accent);
       display: none;
       font-size: clamp(1.45rem, 5vw, 3.2rem);
       font-weight: 900;
@@ -580,7 +635,8 @@
       line-height: 1;
       pointer-events: none;
       text-align: center;
-      text-shadow: 0 5px 24px rgba(0, 0, 0, 0.64);
+      text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(215, 255, 47, 0.25);
       transform: translateX(-50%);
       width: min(92vw, 920px);
     }
@@ -625,21 +681,21 @@
     }
 
     .training-action {
-      border: 1px solid rgba(0, 255, 170, 0.6);
+      border: none;
       border-radius: 999px;
-      background: rgba(0, 255, 170, 0.92);
-      color: #05140f;
+      background: var(--pf-accent);
+      color: #000;
       cursor: grab;
       font-size: 0.9rem;
-      font-weight: 800;
+      font-weight: 900;
       padding: 12px 16px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+      box-shadow: none;
       white-space: nowrap;
     }
 
     .training-action.secondary {
-      border-color: rgba(255, 255, 255, 0.22);
-      background: rgba(10, 10, 10, 0.72);
+      border: 1px solid var(--pf-panel-border);
+      background: var(--pf-panel);
       color: #fff;
       font-size: 0.62rem;
       font-weight: 700;
@@ -655,6 +711,8 @@
       cursor: grabbing;
     }
 
+    /* ---------- Results / day-plan overlay ---------- */
+
     .results-overlay {
       position: absolute;
       inset: 0;
@@ -663,7 +721,8 @@
       align-items: center;
       justify-content: center;
       padding: clamp(14px, 4vw, 32px);
-      background: rgba(0, 0, 0, 0.62);
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(12px);
       pointer-events: auto;
     }
 
@@ -672,47 +731,77 @@
     }
 
     .results-panel {
+      position: relative;
       width: min(92vw, 720px);
-      max-height: min(86vh, 720px);
-      overflow: auto;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 12px;
-      background: rgba(10, 10, 10, 0.9);
-      padding: clamp(16px, 3vw, 24px);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+      max-width: 520px;
+      max-height: min(92vh, 900px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--pf-panel-border);
+      border-radius: 30px;
+      background: var(--pf-panel);
+      padding: 0 28px 28px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
     }
 
+    /* The lime banner is a normal-flow header (not an absolutely
+       positioned overlay), so it always grows to fit its own content -
+       the title, and the close button beneath it - no matter how many
+       lines the title wraps to. Everything that follows it in the DOM
+       simply flows underneath, which rules out any text overlap. */
     .results-header {
+      position: relative;
+      flex: 0 0 auto;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
+      justify-content: flex-start;
+      margin: 0 -28px;
+      padding: 22px 28px 20px;
+      background: linear-gradient(180deg, var(--pf-accent-soft) 0%, #b9f500 85%, transparent 100%);
+      border-radius: 30px 30px 0 0;
     }
 
     .results-header h2 {
       margin: 0;
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      padding: 0 clamp(30px, 8vw, 42px);
+      width: 100%;
+      max-width: 100%;
+      color: #111;
+      font-size: clamp(1.1rem, 2.8vw, 2rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+      text-align: center;
+      text-transform: uppercase;
+      white-space: normal;
     }
 
     .results-total {
-      margin: 0 0 16px;
-      color: #00ffaa;
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      font-weight: 800;
+      flex: 0 0 auto;
+      margin: 20px 0 18px;
+      color: #fff;
+      font-size: clamp(2.4rem, 7vw, 4rem);
+      line-height: 1.05;
+      font-weight: 900;
+      text-align: center;
+      word-break: break-word;
     }
 
     .results-feedback {
-      border: 1px solid rgba(0, 255, 170, 0.24);
-      border-radius: 10px;
-      background: rgba(0, 255, 170, 0.08);
-      margin-bottom: 14px;
-      padding: 12px;
+      flex: 0 0 auto;
+      border: 1px solid var(--pf-panel-border);
+      border-radius: 24px;
+      background: var(--pf-card);
+      margin: 0 0 16px;
+      padding: 22px;
     }
 
     .star-rating {
       display: flex;
+      justify-content: center;
       gap: 4px;
       margin-bottom: 8px;
       font-size: clamp(1.45rem, 4vw, 2rem);
@@ -730,28 +819,56 @@
 
     .feedback-title {
       margin: 0 0 4px;
+      color: var(--pf-accent-soft);
       font-size: clamp(1rem, 2.4vw, 1.25rem);
       font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .feedback-message {
       margin: 0;
       font-size: 0.9rem;
       line-height: 1.35;
+      text-align: center;
       opacity: 0.9;
     }
 
     .results-grid {
+      flex: 1 1 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin: 24px 0 0;
+      padding-bottom: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      align-content: start;
+    }
+
+    .results-grid::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .results-grid::-webkit-scrollbar-thumb {
+      background: #2d2d2d;
+      border-radius: 8px;
     }
 
     .result-card {
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 10px;
+      min-height: 100px;
+      border: none;
+      border-radius: 22px;
+      background: var(--pf-card);
+      text-align: center;
+      padding: 22px 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(198, 255, 0, 0.18);
     }
 
     .result-card strong,
@@ -760,35 +877,58 @@
     }
 
     .result-card strong {
-      font-size: 0.78rem;
-      opacity: 0.86;
+      color: #9d9d9d;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .result-card span {
       margin-top: 6px;
-      font-size: 1.45rem;
-      font-weight: 800;
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 900;
     }
 
     .close-summary-btn {
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(26px, 4vw, 32px);
+      height: clamp(26px, 4vw, 32px);
+      border: none;
+      border-radius: 50%;
+      background: rgba(5, 5, 5, 0.16);
+      color: #111;
       cursor: pointer;
-      font-size: 0.82rem;
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
+      line-height: 1;
       font-weight: 700;
-      padding: 8px 12px;
+      padding: 0;
+      box-shadow: none;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .close-summary-btn:hover {
+      background: rgba(5, 5, 5, 0.32);
+    }
+
+    .close-summary-btn:active {
+      transform: scale(0.92);
     }
 
     .day-plan-subtitle {
-      color: #00ffaa;
+      margin: 20px 0 12px !important;
+      color: var(--pf-accent);
       font-weight: 700;
-      margin: 0 0 12px !important;
     }
 
     .day-plan-list {
-      margin: 0 0 18px;
+      margin: 20px 0 18px;
       padding-left: 20px;
       display: flex;
       flex-direction: column;
@@ -797,9 +937,23 @@
       line-height: 1.35;
     }
 
+    .day-plan-subtitle + .day-plan-list {
+      margin-top: 0;
+    }
+
     .day-plan-start {
       width: 100%;
       cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-card {
+        min-height: 84px;
+      }
     }
 
     @media (max-width: 760px) {
@@ -927,6 +1081,9 @@
         border-radius: 12px;
       }
     }
+
+    /* ---------- Welcome / opening screen ---------- */
+
     @keyframes welcomeFadeInUp {
       from {
         opacity: 0;
@@ -946,11 +1103,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(14px, 2.6vh, 22px);
-      padding: 32px 22px;
       text-align: center;
+      gap: clamp(10px, 2vh, 18px);
+      padding: clamp(18px, 3vh, 36px);
       overflow-y: auto;
-      background: radial-gradient(circle at 50% 20%, #2b2b2b 0%, #141414 45%, #000000 100%);
+      overflow-x: hidden;
+      background: linear-gradient(155deg, var(--pf-accent) 0%, var(--pf-accent) 34%, var(--pf-bg) 34%, var(--pf-bg) 100%);
       transition: opacity 0.6s ease, visibility 0.6s ease;
     }
 
@@ -961,64 +1119,121 @@
     }
 
     .welcome-logo {
-      width: min(200px, 42vw);
+      width: min(180px, 42vw);
+      max-width: 180px;
       height: auto;
+      margin: 0 auto 20px auto;
+      display: block;
       opacity: 0;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
       animation: welcomeFadeInUp 0.9s ease forwards;
       animation-delay: 0.2s;
     }
 
     .welcome-message {
-      font-size: clamp(1.2rem, 3.4vw, 1.7rem);
-      font-weight: 800;
-      color: #fff;
+      width: 100%;
+      max-width: 700px;
       margin: 0;
-      max-width: 560px;
+      color: #fff;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+      text-transform: uppercase;
+      align-self: center;
       opacity: 0;
       animation: welcomeFadeInUp 0.9s ease forwards;
       animation-delay: 1.1s;
     }
 
+    .welcome-message::after {
+      content: "Train smarter. Track every rep.";
+      display: block;
+      margin-top: 14px;
+      color: #d7d7d7;
+      font-size: clamp(0.65rem, 1.8vw, 0.95rem);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+      text-align: center;
+    }
+
     .welcome-tutorial {
+      width: min(560px, 92vw);
       max-width: 520px;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: clamp(0.8rem, 2vw, 0.92rem);
-      line-height: 1.6;
+      flex: 1 1 auto;
+      margin: 0 auto;
+      overflow: auto;
+      border: 1px solid rgba(198, 255, 0, 0.18);
+      border-left: 4px solid var(--pf-accent-soft);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      color: #f1f1f1;
+      font-size: clamp(0.78rem, 1.8vw, 0.92rem);
+      line-height: 1.7;
       text-align: left;
+      padding: 26px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
       opacity: 0;
       animation: welcomeFadeInUp 0.9s ease forwards;
       animation-delay: 2.0s;
     }
 
     .welcome-tutorial-title {
-      margin: 0 0 8px;
+      margin: 0 0 18px;
+      color: var(--pf-accent-soft);
       font-weight: 700;
-      color: #00ffaa;
-      text-align: center;
-      letter-spacing: 0.03em;
+      text-align: left;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
     }
 
     .welcome-tutorial ul {
       margin: 0;
-      padding-left: 1.1em;
+      padding: 0;
+      list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 14px;
+    }
+
+    .welcome-tutorial li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .welcome-tutorial li:last-child {
+      border-bottom: none;
+    }
+
+    .welcome-tutorial li::before {
+      content: "\25CF";
+      color: var(--pf-accent-soft);
+      font-size: 1rem;
+      line-height: 1.2;
+      font-weight: 900;
     }
 
     .welcome-start-btn {
+      display: block;
+      flex: 0 0 auto;
+      width: min(420px, 100%);
+      margin: 0 auto;
       border: none;
-      background: #00ffaa;
-      color: #05140f;
-      padding: 14px 38px;
+      background: var(--pf-accent);
+      color: #000;
+      padding: 18px 28px;
       border-radius: 999px;
-      font-weight: 800;
-      font-size: 1rem;
+      font-weight: 900;
+      font-size: 1.15rem;
       letter-spacing: 0.02em;
       cursor: pointer;
-      box-shadow: 0 0 26px rgba(0, 255, 170, 0.35);
+      box-shadow: none;
       opacity: 0;
       animation: welcomeFadeInUp 0.9s ease forwards;
       animation-delay: 2.9s;
@@ -1029,16 +1244,32 @@
       transform: scale(0.95);
     }
 
-    @media (max-width: 480px) {
-      .welcome-screen {
-        gap: 12px;
-        padding: 24px 16px;
+
+
+    @media (max-height: 760px) {
+      .welcome-logo {
+        width: 60px;
       }
 
-      .welcome-logo {
-        width: min(160px, 46vw);
+      .welcome-message {
+        font-size: clamp(1.25rem, 4.5vw, 2.2rem);
+      }
+
+      .welcome-tutorial {
+        padding: 16px;
+        font-size: 0.76rem;
+      }
+
+      .welcome-tutorial li {
+        padding: 6px 0;
+      }
+
+      .welcome-start-btn {
+        padding: 14px 22px;
+        font-size: 1rem;
       }
     }
+
   </style>
 </head>
 <body>
@@ -1076,6 +1307,8 @@
           <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out" title="Zoom out" disabled>&minus;</button>
           <div class="divider"></div>
           <button id="fitToggle" class="fit-btn" type="button" aria-label="Switch to fit mode" title="Switch between fill and fit">Fit</button>
+          <div class="divider"></div>
+          <button id="flipCamera" class="flip-btn" type="button" aria-label="Switch to back camera" title="Switch between front and back camera">Rear</button>
         </div>
       </div>
 
@@ -1347,7 +1580,7 @@
       <div class="results-panel">
         <div class="results-header">
           <h2>Workout Complete</h2>
-          <button id="closeSummary" class="close-summary-btn" type="button">Close</button>
+          <button id="closeSummary" class="close-summary-btn" type="button" aria-label="Close">&times;</button>
         </div>
         <div class="results-feedback">
           <div class="star-rating" id="starRating" aria-label="1 star rating">
@@ -1367,7 +1600,7 @@
       <div class="results-panel">
         <div class="results-header">
           <h2 id="dayPlanTitle">Day 1 – Full Body Strength</h2>
-          <button id="closeDayPlan" class="close-summary-btn" type="button">Close</button>
+          <button id="closeDayPlan" class="close-summary-btn" type="button" aria-label="Close">&times;</button>
         </div>
         <p class="day-plan-subtitle" id="dayPlanSubtitle" style="display: none;"></p>
         <ol class="day-plan-list" id="dayPlanList"></ol>
@@ -1389,6 +1622,7 @@
     const zoomOutButton = document.getElementById('zoomOut');
     const zoomLevelButton = document.getElementById('zoomLevel');
     const fitToggleButton = document.getElementById('fitToggle');
+    const flipCameraButton = document.getElementById('flipCamera');
     const toggleExercisesButton = document.getElementById('toggleExercises');
     const modeSwitchElement = document.getElementById('modeSwitch');
     const toggleCameraControlsButton = document.getElementById('toggleCameraControls');
@@ -1656,6 +1890,8 @@
     let currentMode = 'curls';
     let cameraZoom = 1;
     let isFitMode = false;
+    let cameraFacingMode = 'user';
+    let mirrorPreview = true;
     const ZOOM_MIN = 1;
     const ZOOM_MAX = 2.5;
     const ZOOM_STEP = 0.1;
@@ -2921,8 +3157,10 @@
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-      canvasCtx.translate(canvasElement.width, 0);
-      canvasCtx.scale(-1, 1);
+      if (mirrorPreview) {
+        canvasCtx.translate(canvasElement.width, 0);
+        canvasCtx.scale(-1, 1);
+      }
 
       if (cameraZoom !== 1) {
         const centerX = canvasElement.width / 2;
@@ -3532,11 +3770,16 @@
     });
     pose.onResults(onResults);
 
-    const camera = new Camera(videoElement, {
-      onFrame: async () => {
-        await pose.send({image: videoElement});
-      },
-    });
+    function createCamera() {
+      return new Camera(videoElement, {
+        onFrame: async () => {
+          await pose.send({image: videoElement});
+        },
+        facingMode: cameraFacingMode,
+      });
+    }
+
+    let camera = createCamera();
 
     let experienceStarted = false;
 
@@ -3548,6 +3791,49 @@
     }
 
     startExperienceButton.addEventListener('click', startExperience);
+
+    let isFlippingCamera = false;
+
+    flipCameraButton.addEventListener('click', async () => {
+      if (isFlippingCamera) return;
+      isFlippingCamera = true;
+      flipCameraButton.disabled = true;
+
+      const previousFacingMode = cameraFacingMode;
+      const previousMirrorPreview = mirrorPreview;
+
+      try {
+        if (camera && typeof camera.stop === 'function') {
+          camera.stop();
+        }
+
+        cameraFacingMode = cameraFacingMode === 'user' ? 'environment' : 'user';
+        mirrorPreview = cameraFacingMode === 'user';
+
+        camera = createCamera();
+
+        if (experienceStarted) {
+          await camera.start();
+        }
+
+        flipCameraButton.textContent = cameraFacingMode === 'user' ? 'Rear' : 'Front';
+        const flipLabel = cameraFacingMode === 'user' ? 'Switch to back camera' : 'Switch to front camera';
+        flipCameraButton.setAttribute('aria-label', flipLabel);
+        flipCameraButton.title = flipLabel;
+      } catch (error) {
+        // Device may not have a second camera, or permission was denied for
+        // the new constraints - fall back to whatever was working before.
+        cameraFacingMode = previousFacingMode;
+        mirrorPreview = previousMirrorPreview;
+        camera = createCamera();
+        if (experienceStarted) {
+          camera.start();
+        }
+      } finally {
+        isFlippingCamera = false;
+        flipCameraButton.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
